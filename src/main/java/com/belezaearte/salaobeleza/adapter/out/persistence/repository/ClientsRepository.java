@@ -1,4 +1,7 @@
 package com.belezaearte.salaobeleza.adapter.out.persistence.repository;
 
-public interface ClientsRepository {
+import com.belezaearte.salaobeleza.adapter.out.persistence.Clients;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ClientsRepository extends JpaRepository<Clients, Integer> {
 }
