@@ -1,4 +1,5 @@
 package com.belezaearte.salaobeleza.application.port.in.Appointments;
 
 public interface DeleteAppointmentsUseCase {
+    void deleteAppointments (Integer id);
 }
