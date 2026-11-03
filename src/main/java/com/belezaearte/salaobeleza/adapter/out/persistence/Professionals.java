@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -33,6 +34,9 @@ public class Professionals {
     @Column(name = "email")
     private String email;
 
-    @Column (name= "created_at")
+    // Preenchido automaticamente com a data/hora do cadastro.
+    // updatable = false: um update nunca muda a data de cadastro.
+    @CreationTimestamp
+    @Column (name= "created_at", updatable = false)
     private LocalDateTime created;
 }
