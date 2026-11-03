@@ -2,7 +2,9 @@
 
 API do sistema de agendamento para salões de beleza de pequeno e médio porte, desenvolvido no Projeto Integrador do curso de Análise e Desenvolvimento de Sistemas (SENAC).
 
-**Tecnologias:** Java 21 · Spring Boot · Spring Data JPA · PostgreSQL (Supabase) · Lombok · Maven
+**Tecnologias:** Java 21 · Spring Boot · Spring Data JPA · PostgreSQL (Supabase) · Flyway · Lombok · Maven
+
+**Banco de dados:** veja o [dicionário de dados](docs/banco-de-dados.md), com a explicação de cada tabela e campo.
 
 ---
 
@@ -96,6 +98,8 @@ Dados de conexão, caso queira abrir o banco num cliente como DBeaver ou pgAdmin
 ### Como funciona o perfil `dev`
 
 O Spring sempre lê o arquivo `src/main/resources/application.properties` (configuração do Supabase). Quando o perfil `dev` está ativo, ele lê **também** o `application-dev.properties`, e o que estiver nele substitui a configuração padrão — no caso, o endereço, usuário e senha do banco.
+
+No perfil `dev`, as tabelas são criadas pelo **Flyway**, a partir dos scripts SQL em `src/main/resources/db/migration/`. Na primeira vez que a aplicação sobe, aparece no terminal `Successfully applied 1 migration`. A explicação de cada tabela e campo está no [dicionário de dados](docs/banco-de-dados.md).
 
 ---
 
