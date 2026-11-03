@@ -101,6 +101,18 @@ O Spring sempre lê o arquivo `src/main/resources/application.properties` (confi
 
 No perfil `dev`, as tabelas são criadas pelo **Flyway**, a partir dos scripts SQL em `src/main/resources/db/migration/`. Na primeira vez que a aplicação sobe, aparece no terminal `Successfully applied 1 migration`. A explicação de cada tabela e campo está no [dicionário de dados](docs/banco-de-dados.md).
 
+### Dados de teste
+
+O script `V2__dados_de_teste.sql` já popula o banco com dados fictícios em todas as tabelas — os mesmos profissionais, serviços e preços que aparecem no front-end:
+
+- **10 serviços** (um inativo) e **9 profissionais** (Anna é a dona do salão, com papel `ADMIN`; Laura está inativa)
+- **6 clientes**, **8 agendamentos** (um de cada status: agendado, confirmado, concluído, cancelado, não compareceu) e **6 pagamentos**
+- Horários de trabalho, recursos do salão (cadeiras, cabine) e os serviços que cada profissional faz
+
+**Login de teste:** usuário = coluna `username` (ex: `anna`), senha `Senha@123` para todos.
+
+As datas dos agendamentos são relativas ao dia em que o script rodou (alguns no passado, outros nos próximos dias).
+
 ---
 
 ## 4. Como o código está organizado
