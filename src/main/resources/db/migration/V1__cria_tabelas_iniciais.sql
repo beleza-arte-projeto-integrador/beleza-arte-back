@@ -38,6 +38,7 @@ CREATE TABLE clients (
     name        VARCHAR(120) NOT NULL,
     phone       VARCHAR(20)  NOT NULL UNIQUE,
     email       VARCHAR(160),
+    address     TEXT,
     birth_date  DATE,
     preferences TEXT,
     created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),

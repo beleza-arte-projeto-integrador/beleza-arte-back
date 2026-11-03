@@ -105,6 +105,7 @@ Quem agenda os serviços. O cadastro é criado no próprio agendamento online (n
 | `name` | VARCHAR(120) | ✅ | Nome do cliente |
 | `phone` | VARCHAR(20) | ✅ | Telefone. **Único**: é o que identifica o cliente quando ele volta a agendar, e por onde chegam os lembretes |
 | `email` | VARCHAR(160) | | E-mail, para confirmações e lembretes |
+| `address` | TEXT | | Endereço do cliente. Opcional; já usado no back-end (`ClientsDto` e busca por endereço) |
 | `birth_date` | DATE | | Data de nascimento. Opcional; permite ações como mensagem de aniversário |
 | `preferences` | TEXT | | Preferências e observações (ex: "alergia a amônia", "prefere atendimento pela manhã"). É o "prontuário" citado no relatório |
 | `created_at` | TIMESTAMPTZ | ✅ | Data do cadastro ("cliente desde"). Automático |
