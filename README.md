@@ -99,7 +99,7 @@ Dados de conexão, caso queira abrir o banco num cliente como DBeaver ou pgAdmin
 
 O Spring sempre lê o arquivo `src/main/resources/application.properties` (configuração do Supabase). Quando o perfil `dev` está ativo, ele lê **também** o `application-dev.properties`, e o que estiver nele substitui a configuração padrão — no caso, o endereço, usuário e senha do banco.
 
-No perfil `dev`, as tabelas são criadas pelo **Flyway**, a partir dos scripts SQL em `src/main/resources/db/migration/`. Na primeira vez que a aplicação sobe, aparece no terminal `Successfully applied 1 migration`. A explicação de cada tabela e campo está no [dicionário de dados](docs/banco-de-dados.md).
+Nos dois bancos (Supabase e local), as tabelas são criadas pelo **Flyway**, a partir dos scripts SQL em `src/main/resources/db/migration/`. No banco local, na primeira vez que a aplicação sobe, aparece no terminal `Successfully applied 2 migrations`; no Supabase os scripts já rodaram, então ele só confere. A explicação de cada tabela e campo está no [dicionário de dados](docs/banco-de-dados.md).
 
 ### Dados de teste
 

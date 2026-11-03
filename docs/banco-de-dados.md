@@ -246,4 +246,4 @@ O Flyway executa, em ordem, os scripts da pasta `src/main/resources/db/migration
 4. Teste no [banco local](../README.md#3-banco-local-opcional): o Flyway roda o script novo e o Hibernate confere se as entidades batem com as tabelas.
 5. Atualize **este documento**.
 
-> **Situação atual:** o Flyway está ligado só no perfil `dev` (banco local). No Supabase ele continua desligado até o grupo combinar a migração, porque lá já existem tabelas criadas pelo Hibernate.
+> **Situação atual:** o Flyway está ligado nos dois bancos. O Supabase foi migrado em 03/11/2026: as 4 tabelas antigas (criadas manualmente) foram substituídas pelas do V1, e o V2 colocou os dados de teste. Um script novo que entrar no `main` é aplicado no Supabase na primeira vez que alguém rodar a aplicação no modo padrão — por isso, **teste sempre no banco local antes de abrir o PR**.
