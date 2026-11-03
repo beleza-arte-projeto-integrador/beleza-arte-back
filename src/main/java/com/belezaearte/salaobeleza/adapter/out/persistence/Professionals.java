@@ -33,6 +33,6 @@ public class Professionals {
     @Column(name = "email")
     private String email;
 
-    @Column (name= "created")
+    @Column (name= "created_at")
     private LocalDateTime created;
 }
