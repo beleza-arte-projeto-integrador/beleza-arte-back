@@ -84,13 +84,16 @@ public class ServicesService implements CreateServicesUseCase, DeleteServicesUse
     public List<ServicesDto> searchCreated(LocalDateTime searchCreation){
         List<Services> servicesList = searchCreatedServicesPort.searchCreated(searchCreation);
 
-        return servicesList.stream().map(services -> ServicesDto.builder()
-                .id(services.getId())
-                .name(services.getName())
-                .description(services.getDescription())
-                .price(services.getPrice())
-                .duration_minutes(services.getDuration_minutes())
-                .created(services.getCreated())
-                .build());
-    }
+        return servicesList.stream()
+                .map(services -> ServicesDto.builder()
+                        .id(services.getId())
+                        .name(services.getName())
+                        .description(services.getDescription())
+                        .price(services.getPrice())
+                        .duration_minutes(services.getDuration_minutes())
+                        .created(services.getCreated())
+                        .build())
+                .toList();
+
+      }
     }
