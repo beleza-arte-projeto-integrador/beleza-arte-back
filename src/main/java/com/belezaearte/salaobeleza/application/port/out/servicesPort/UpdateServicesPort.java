@@ -5,5 +5,5 @@ import com.belezaearte.salaobeleza.adapter.out.persistence.Services;
 import java.util.Optional;
 
 public interface UpdateServicesPort {
-    Optional<Services> update (Services services);
+    Services update (Services services);
 }
