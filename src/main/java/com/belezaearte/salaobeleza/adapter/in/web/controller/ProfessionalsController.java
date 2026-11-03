@@ -74,7 +74,7 @@ public class ProfessionalsController {
             value = "/searchName",
             produces = {"application/json"}
     )
-    public ResponseEntity<List<ProfessionalsDto>> searchName (String name) {
+    public ResponseEntity<List<ProfessionalsDto>> searchName (@RequestParam String name) {
         List<ProfessionalsDto> professionalsDto = searchNameProfessionalsUseCase.searchName(name);
         return ResponseEntity.ok(professionalsDto);
     }
