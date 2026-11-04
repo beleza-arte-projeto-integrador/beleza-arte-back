@@ -1,15 +1,13 @@
 package com.belezaearte.salaobeleza.adapter.in.web.controller;
 
 import com.belezaearte.salaobeleza.application.domain.dto.ServicesDto;
-import com.belezaearte.salaobeleza.application.port.in.Services.CreateServicesUseCase;
-import com.belezaearte.salaobeleza.application.port.in.Services.DeleteServicesUseCase;
-import com.belezaearte.salaobeleza.application.port.in.Services.SearchCreatedServicesUseCase;
-import com.belezaearte.salaobeleza.application.port.in.Services.UpdateServicesUseCase;
+import com.belezaearte.salaobeleza.application.port.in.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -67,5 +65,57 @@ public class ServicesController {
         return ResponseEntity.ok(searchCreated);
     }
 
-//SearchDescriptionServicesUseCase,SearchDurationServicesUseCase,SearchNameServicesUseCase,SearchPriceServicesUseCase
+    @Autowired
+    private SearchDescriptionServicesUseCase searchDescriptionServicesUseCase;
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/searchDescription",
+            produces = {"application/json"}
+    )
+
+    public ResponseEntity<List<ServicesDto>> searchDescription(@RequestParam String description){
+        List<ServicesDto> searchDescription = searchDescriptionServicesUseCase.searchDescription(description);
+        return ResponseEntity.ok(searchDescription);
+    }
+    @Autowired
+   private SearchDurationServicesUseCase searchDurationServicesUseCase;
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/searchDuration",
+            produces = {"application/json"}
+    )
+    public ResponseEntity<List<ServicesDto>>searchDurationMinuts(@RequestParam Integer duration_minutes){
+        List<ServicesDto> searchDuration = searchDurationServicesUseCase.searchDurationMinuts(duration_minutes);
+        return ResponseEntity.ok(searchDuration);
+    }
+    @Autowired
+    private SearchNameServicesUseCase searchNameServicesUseCase;
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/searchName",
+            produces = {"application/json"}
+    )
+    public ResponseEntity<List<ServicesDto>>searchName (@RequestParam String name){
+        List<ServicesDto> searchName = searchNameServicesUseCase.searchName(name);
+
+        if (searchName.isEmpty()) {// corrige o retorno JSON 1 [] no Postman
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(searchName);
+    }
+    private SearchPriceServicesUseCase searchPriceServicesUseCase;
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/searchPrice",
+            produces = {"application/json"}
+    )
+    public ResponseEntity<List<ServicesDto>>searchPrice (@RequestParam BigDecimal price){
+        List<ServicesDto> searchPrice = searchPriceServicesUseCase.searchPrice(price);
+        return ResponseEntity.ok(searchPrice);
+        }
 }
+
