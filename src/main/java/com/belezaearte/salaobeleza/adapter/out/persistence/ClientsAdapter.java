@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class ClientsAdapter implements CreateClientsPort, UpdateClientsPort, DeleteClientsPort, SearchNameClientsPort, SearchPhoneClientsPort, SearchEmailClientsPort, SearchAddressClientsPort, SearchCreatedClientsPort {
+public class ClientsAdapter implements CreateClientsPort, UpdateClientsPort, DeleteClientsPort, SearchNameClientsPort, SearchPhoneClientsPort, SearchEmailClientsPort, SearchCreatedClientsPort {
 
     private final ClientsRepository clientsRepository;
 
@@ -57,12 +57,6 @@ public class ClientsAdapter implements CreateClientsPort, UpdateClientsPort, Del
     public List<Clients> searchEmail(String email) {
         Clients clients = Clients.builder().email(email).build();
         return clientsRepository.findAll(Example.of(clients, ExampleMatcher.matching().withIgnoreCase()));
-    }
-
-    @Override
-    public List<Clients> searchAddress(String address) {
-        Clients clients = Clients.builder().address(address).build();
-        return clientsRepository.findAll(Example.of(clients, CONTAINS_IGNORE_CASE));
     }
 
     @Override

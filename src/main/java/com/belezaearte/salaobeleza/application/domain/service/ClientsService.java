@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCase, DeleteClientsUseCase, SearchNameClientsUseCase, SearchPhoneClientsUseCase, SearchEmailClientsUseCase, SearchAddressClientsUseCase, SearchCreatedClientsUseCase {
+public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCase, DeleteClientsUseCase, SearchNameClientsUseCase, SearchPhoneClientsUseCase, SearchEmailClientsUseCase, SearchCreatedClientsUseCase {
 
     private static final String NOT_FOUND = "Could not find client!, The requested client was not found in the system!";
 
@@ -30,8 +30,6 @@ public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCas
     private SearchPhoneClientsPort searchPhoneClientsPort;
     @Autowired
     private SearchEmailClientsPort searchEmailClientsPort;
-    @Autowired
-    private SearchAddressClientsPort searchAddressClientsPort;
     @Autowired
     private SearchCreatedClientsPort searchCreatedClientsPort;
     @Autowired
@@ -114,11 +112,6 @@ public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCas
     }
 
     @Override
-    public List<ClientsDto> searchAddress(String address) {
-        return toDtoListOrNotFound(searchAddressClientsPort.searchAddress(address));
-    }
-
-    @Override
     public List<ClientsDto> searchCreatedClients(LocalDateTime created) {
         return toDtoListOrNotFound(searchCreatedClientsPort.searchCreatedClients(created));
     }
@@ -149,9 +142,6 @@ public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCas
                 .name(dto.getName())
                 .phone(dto.getPhone())
                 .email(dto.getEmail())
-                .address(dto.getAddress())
-                .birthDate(dto.getBirthDate())
-                .preferences(dto.getPreferences())
                 .created(dto.getCreated())
                 .build();
     }
@@ -162,11 +152,7 @@ public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCas
                 .name(client.getName())
                 .phone(client.getPhone())
                 .email(client.getEmail())
-                .address(client.getAddress())
-                .birthDate(client.getBirthDate())
-                .preferences(client.getPreferences())
                 .created(client.getCreated())
-                .updated(client.getUpdated())
                 .build();
     }
 }

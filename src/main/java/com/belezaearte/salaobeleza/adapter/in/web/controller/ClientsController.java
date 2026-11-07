@@ -93,18 +93,6 @@ public class ClientsController {
     }
 
     @Autowired
-    private SearchAddressClientsUseCase searchAddressClientsUseCase;
-
-    @RequestMapping(
-            method = RequestMethod.GET,
-            value = "/searchAddressClients",
-            produces = {"application/json"}
-    )
-    public ResponseEntity<List<ClientsDto>> searchAddress(@RequestParam String address) {
-        return ResponseEntity.ok(searchAddressClientsUseCase.searchAddress(address));
-    }
-
-    @Autowired
     private SearchCreatedClientsUseCase searchCreatedClientsUseCase;
 
     @RequestMapping(
