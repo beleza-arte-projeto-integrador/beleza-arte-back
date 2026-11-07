@@ -2,7 +2,7 @@
 
 Este documento explica **cada tabela e cada campo** do banco de dados: para que serve e como é usado no sistema.
 
-A estrutura oficial do banco está no script [`V1__cria_tabelas_iniciais.sql`](../src/main/resources/db/migration/V1__cria_tabelas_iniciais.sql), executado pelo **Flyway**. Se este documento e o script discordarem, o script é que vale — e este documento deve ser corrigido.
+O banco fica no **Supabase**, e as tabelas são criadas e alteradas direto nele. Se este documento e o Supabase discordarem, o Supabase é que vale — e este documento deve ser corrigido.
 
 ---
 
@@ -13,7 +13,7 @@ A estrutura oficial do banco está no script [`V1__cria_tabelas_iniciais.sql`](.
 3. [Tabelas](#3-tabelas)
    - [professionals](#professionals--profissionais) · [clients](#clients--clientes) · [services](#services--serviços) · [professional_services](#professional_services--serviços-de-cada-profissional) · [professional_availability](#professional_availability--horário-de-trabalho) · [resources](#resources--recursos-do-salão) · [appointments](#appointments--agendamentos) · [appointment_items](#appointment_items--itens-do-agendamento) · [payments](#payments--pagamentos)
 4. [Regras de negócio que ficam no código](#4-regras-de-negócio-que-ficam-no-código)
-5. [Como alterar o banco (Flyway)](#5-como-alterar-o-banco-flyway)
+5. [Como alterar o banco](#5-como-alterar-o-banco)
 
 ---
 
@@ -105,11 +105,9 @@ Quem agenda os serviços. O cadastro é criado no próprio agendamento online (n
 | `name` | VARCHAR(120) | ✅ | Nome do cliente |
 | `phone` | VARCHAR(20) | ✅ | Telefone. **Único**: é o que identifica o cliente quando ele volta a agendar, e por onde chegam os lembretes |
 | `email` | VARCHAR(160) | | E-mail, para confirmações e lembretes |
-| `address` | TEXT | | Endereço do cliente. Opcional; já usado no back-end (`ClientsDto` e busca por endereço) |
-| `birth_date` | DATE | | Data de nascimento. Opcional; permite ações como mensagem de aniversário |
-| `preferences` | TEXT | | Preferências e observações (ex: "alergia a amônia", "prefere atendimento pela manhã"). É o "prontuário" citado no relatório |
 | `created_at` | TIMESTAMPTZ | ✅ | Data do cadastro ("cliente desde"). Automático |
-| `updated_at` | TIMESTAMPTZ | | Última alteração do cadastro |
+
+Os campos são os mesmos da tela de cadastro do front-end (nome, telefone e e-mail).
 
 O **histórico de serviços** do cliente não é um campo: ele é obtido juntando `appointments` + `appointment_items` desse cliente.
 
@@ -234,16 +232,11 @@ Algumas regras **não** são garantidas pelo banco e precisam ser verificadas no
 
 ---
 
-## 5. Como alterar o banco (Flyway)
+## 5. Como alterar o banco
 
-O Flyway executa, em ordem, os scripts da pasta `src/main/resources/db/migration/` e anota no próprio banco (tabela `flyway_schema_history`) quais já rodaram. Assim, todo mundo chega exatamente na mesma estrutura.
+1. Combine no grupo antes, porque o banco é compartilhado por todos.
+2. Faça a mudança direto no Supabase (pelo site ou por um cliente como o DBeaver).
+3. Ajuste a entidade Java correspondente: os nomes nas anotações `@Column` precisam ser iguais aos das colunas.
+4. Atualize **este documento**.
 
-**Para mudar algo no banco:**
-
-1. **Não edite** um script que já está no `main` — o Flyway detecta a alteração e a aplicação não sobe.
-2. Crie o **próximo** script, com o número seguinte e uma descrição: `V2__adiciona_campo_x.sql` (são **dois** sublinhados depois do número).
-3. Ajuste a entidade Java correspondente.
-4. Teste no [banco local](../README.md#3-banco-local-opcional): o Flyway roda o script novo e o Hibernate confere se as entidades batem com as tabelas.
-5. Atualize **este documento**.
-
-> **Situação atual:** o Flyway está ligado nos dois bancos. O Supabase foi migrado em 03/11/2026: as 4 tabelas antigas (criadas manualmente) foram substituídas pelas do V1, e o V2 colocou os dados de teste. Um script novo que entrar no `main` é aplicado no Supabase na primeira vez que alguém rodar a aplicação no modo padrão — por isso, **teste sempre no banco local antes de abrir o PR**.
+> A aplicação não cria nem altera tabelas (`spring.jpa.hibernate.ddl-auto=none`). Se aparecer o erro `column ... does not exist`, alguma entidade está diferente da tabela no Supabase.

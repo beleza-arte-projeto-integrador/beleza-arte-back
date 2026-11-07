@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,10 +16,6 @@ public class ClientsDto {
     private String name;
     private String phone;
     private String email;
-    private String address;
-    private LocalDate birthDate;
-    private String preferences;
     private LocalDateTime created;
-    private LocalDateTime updated;
 
 }

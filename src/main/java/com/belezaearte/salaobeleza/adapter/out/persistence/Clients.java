@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -34,24 +32,9 @@ public class Clients {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "birth_date")
-    private LocalDate birthDate;
-
-    // Preferências e observações (ex: "alergia a amônia").
-    @Column(name = "preferences")
-    private String preferences;
-
     // Preenchido automaticamente com a data/hora do cadastro.
     // updatable = false: um update nunca muda a data de cadastro.
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime created;
-
-    // Preenchido automaticamente sempre que o cadastro é alterado.
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updated;
 }
