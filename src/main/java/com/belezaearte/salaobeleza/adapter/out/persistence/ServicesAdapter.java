@@ -11,12 +11,13 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class ServicesAdapter implements CreateServicesPort, DeleteServicesPort, UpdateServicesPort, SearchCreatedServicesPort, SearchDescriptionServicesPort, SearchDurationServicesPort, SearchNameServicesPort, SearchPriceServicesPort {
+public class ServicesAdapter implements CreateServicesPort, DeleteServicesPort, UpdateServicesPort, SearchCreatedServicesPort, SearchDescriptionServicesPort, SearchDurationServicesPort, SearchNameServicesPort, SearchPriceServicesPort, SearchCategoryPort {
     private final ServicesRepository servicesRepository;
     @Override
     @Transactional
@@ -38,9 +39,11 @@ public class ServicesAdapter implements CreateServicesPort, DeleteServicesPort, 
         if(servicesOptional.isPresent()){
             Services servicesUpdate = servicesOptional.get();
 
+            servicesUpdate.setName(services.getName());
             servicesUpdate.setCreated(services.getCreated());
             servicesUpdate.setDescription(services.getDescription());
             servicesUpdate.setDuration_minutes(services.getDuration_minutes());
+            servicesUpdate.setCategory(services.getCategory());
             servicesUpdate.setPrice(services.getPrice());
 
             return servicesRepository.saveAndFlush(servicesUpdate);
@@ -48,7 +51,7 @@ public class ServicesAdapter implements CreateServicesPort, DeleteServicesPort, 
         return null;
     }
     @Override
-    public List<Services> searchCreated(LocalDateTime searchCreation){
+    public List<Services> searchCreated(OffsetDateTime searchCreation){
         Services services = Services.builder()
                 .created(searchCreation).build();
 
@@ -83,6 +86,14 @@ public class ServicesAdapter implements CreateServicesPort, DeleteServicesPort, 
     public List<Services> searchPrice (BigDecimal price){
         Services services = Services.builder()
                 .price(price).build();
+
+        Example<Services> example = Example.of(services);
+        return servicesRepository.findAll(example);
+    }
+    @Override
+    public List<Services> categories (String category){
+        Services services = Services.builder()
+                .category(category).build();
 
         Example<Services> example = Example.of(services);
         return servicesRepository.findAll(example);

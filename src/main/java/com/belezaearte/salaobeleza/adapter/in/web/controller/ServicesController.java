@@ -2,13 +2,14 @@ package com.belezaearte.salaobeleza.adapter.in.web.controller;
 
 import com.belezaearte.salaobeleza.application.domain.dto.ServicesDto;
 import com.belezaearte.salaobeleza.application.port.in.Services.*;
+import com.belezaearte.salaobeleza.application.port.out.servicesPort.SearchCategoryPort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -19,7 +20,7 @@ public class ServicesController {
    private CreateServicesUseCase createServicesUseCase;
 
     @RequestMapping(
-            method = RequestMethod.POST,
+            method = RequestMethod.PUT,
             value = "/createServices",
             produces = {"application/json"},
             consumes = {"application/json"}
@@ -44,7 +45,7 @@ public class ServicesController {
     private UpdateServicesUseCase updateServicesUseCase;
 
     @RequestMapping(
-            method = RequestMethod.PUT,
+            method = RequestMethod.POST,
             value = "/updateServices",
             produces = {"application/json"},
             consumes = {"application/json"}
@@ -60,8 +61,12 @@ public class ServicesController {
             value = "/searchCreated",
             produces = {"application/json"}
     )
-    public ResponseEntity<List<ServicesDto>> searchCreated(@RequestParam LocalDateTime searchCreation){
+    public ResponseEntity<List<ServicesDto>> searchCreated(@RequestParam OffsetDateTime searchCreation){
         List<ServicesDto> searchCreated = searchCreatedServicesUseCase.searchCreated(searchCreation);
+
+        if(searchCreated.isEmpty()){
+           return ResponseEntity.notFound().build();
+       }
         return ResponseEntity.ok(searchCreated);
     }
 
@@ -76,6 +81,10 @@ public class ServicesController {
 
     public ResponseEntity<List<ServicesDto>> searchDescription(@RequestParam String description){
         List<ServicesDto> searchDescription = searchDescriptionServicesUseCase.searchDescription(description);
+
+        if(searchDescription.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(searchDescription);
     }
     @Autowired
@@ -88,6 +97,10 @@ public class ServicesController {
     )
     public ResponseEntity<List<ServicesDto>>searchDurationMinuts(@RequestParam Integer duration_minutes){
         List<ServicesDto> searchDuration = searchDurationServicesUseCase.searchDurationMinuts(duration_minutes);
+
+        if(searchDuration.isEmpty()){
+           return ResponseEntity.notFound().build();
+       }
         return ResponseEntity.ok(searchDuration);
     }
     @Autowired
@@ -107,6 +120,7 @@ public class ServicesController {
 
         return ResponseEntity.ok(searchName);
     }
+  @Autowired
     private SearchPriceServicesUseCase searchPriceServicesUseCase;
     @RequestMapping(
             method = RequestMethod.GET,
@@ -115,7 +129,26 @@ public class ServicesController {
     )
     public ResponseEntity<List<ServicesDto>>searchPrice (@RequestParam BigDecimal price){
         List<ServicesDto> searchPrice = searchPriceServicesUseCase.searchPrice(price);
+
+        if (searchPrice.isEmpty()) {// corrige o retorno JSON 1 [] no Postman
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(searchPrice);
         }
+    @Autowired
+    private searchCategoryUseCase searchCategoryUseCase;
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/searchCategory",
+            produces = {"application/json"}
+    )
+    public ResponseEntity<List<ServicesDto>>searchCategory (@RequestParam String category){
+        List<ServicesDto> searchCategory = searchCategoryUseCase.categories(category);
+
+        if (searchCategory.isEmpty()) {// corrige o retorno JSON 1 [] no Postman
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(searchCategory);
+    }
 }
 

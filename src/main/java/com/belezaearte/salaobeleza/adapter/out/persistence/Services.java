@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @Entity
@@ -34,7 +35,9 @@ public class Services {
     @Column (name = "duration_minutes", nullable = true)
     private Integer duration_minutes;
 
-    @Column (name = "created", nullable = true)
-    private LocalDateTime created;
+    @Column (name = "created_at", nullable = true)
+    private OffsetDateTime created;
 
+    @Column (name = "category", nullable = true)
+    private String category;
 }

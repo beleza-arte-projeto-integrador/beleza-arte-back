@@ -9,17 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
-public class ServicesService implements CreateServicesUseCase,DeleteServicesUseCase,UpdateServicesUseCase,SearchCreatedServicesUseCase,SearchDescriptionServicesUseCase,SearchDurationServicesUseCase,SearchNameServicesUseCase,SearchPriceServicesUseCase {
+public class ServicesService implements CreateServicesUseCase,DeleteServicesUseCase,UpdateServicesUseCase,SearchCreatedServicesUseCase,SearchDescriptionServicesUseCase,SearchDurationServicesUseCase,SearchNameServicesUseCase,SearchPriceServicesUseCase, searchCategoryUseCase {
     @Autowired
     public CreateServicesPort createServicesPort;
 
     @Override
     public ServicesDto create (ServicesDto servicesDto){
-        if(servicesDto.getName() == null || servicesDto.getDescription() == null || servicesDto.getPrice() == null || servicesDto.getDuration_minutes() == null){
+        if(servicesDto.getName() == null || servicesDto.getDescription() == null || servicesDto.getPrice() == null || servicesDto.getDuration_minutes() == null || servicesDto.getCategory()==null){
             throw new BusinessOutboundException("Erro: Campo não preenchido, por favor verifique se preencheu os dados corretamente");
         }
         Services servicesEntity = Services.builder()
@@ -28,7 +28,9 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                 .description(servicesDto.getDescription())
                 .price(servicesDto.getPrice())
                 .duration_minutes(servicesDto.getDuration_minutes())
-                .created(servicesDto.getCreated()).build();
+                .created(servicesDto.getCreated())
+                .category(servicesDto.getCategory())
+                .build();
 
         Services serviceSaved = createServicesPort.create(servicesEntity);
 
@@ -36,7 +38,9 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                 .name(serviceSaved.getName())
                 .description(serviceSaved.getDescription())
                 .price(serviceSaved.getPrice())
-                .duration_minutes(serviceSaved.getDuration_minutes()).build();
+                .duration_minutes(serviceSaved.getDuration_minutes())
+                .category(serviceSaved.getCategory())
+                .build();
     }
     @Autowired
     private DeleteServicesPort deleteServicesPort;
@@ -57,7 +61,9 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                 .description(servicesDto.getDescription())
                 .price(servicesDto.getPrice())
                 .duration_minutes(servicesDto.getDuration_minutes())
-                .created(servicesDto.getCreated()).build();
+                .created(servicesDto.getCreated())
+                .category(servicesDto.getCategory())
+                .build();
 
         Services servicesUpdate = updateServicesPort.update(servicesEntity);
 
@@ -70,13 +76,15 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                 .description(servicesDto.getDescription())
                 .price(servicesDto.getPrice())
                 .duration_minutes(servicesDto.getDuration_minutes())
-                .created(servicesDto.getCreated()).build();
+                .created(servicesDto.getCreated())
+                .category(servicesDto.getCategory())
+                .build();
     }
     @Autowired
     private SearchCreatedServicesPort searchCreatedServicesPort;
 
     @Override
-    public List<ServicesDto> searchCreated(LocalDateTime searchCreation){
+    public List<ServicesDto> searchCreated(OffsetDateTime searchCreation){
         List<Services> servicesList = searchCreatedServicesPort.searchCreated(searchCreation);
 
         return servicesList.stream()
@@ -87,6 +95,7 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                         .price(services.getPrice())
                         .duration_minutes(services.getDuration_minutes())
                         .created(services.getCreated())
+                        .category(services.getCategory())
                         .build())
                 .toList();
       }
@@ -104,7 +113,8 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                         .price(services.getPrice())
                         .duration_minutes(services.getDuration_minutes())
                         .created(services.getCreated())
-                .build())
+                        .category(services.getCategory())
+                        .build())
                 .toList();
     }
     @Autowired
@@ -121,6 +131,7 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                         .price(services.getPrice())
                         .duration_minutes(services.getDuration_minutes())
                         .created(services.getCreated())
+                        .category(services.getCategory())
                         .build())
                 .toList();
     }
@@ -136,6 +147,7 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                         .name(services.getName())
                         .description(services.getDescription())
                         .created(services.getCreated())
+                        .category(services.getCategory())
                         .build())
                 .toList();
     }
@@ -153,7 +165,27 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                         .price(services.getPrice())
                         .duration_minutes(services.getDuration_minutes())
                         .created(services.getCreated())
+                        .category(services.getCategory())
                         .build())
                 .toList();
        }
+    @Autowired
+    private SearchCategoryPort searchCategoryPort;
+
+    @Override
+    public List<ServicesDto> categories(String SearchCategory){
+        List<Services> servicesList = searchCategoryPort.categories(SearchCategory);
+
+        return servicesList.stream()
+                .map(services -> ServicesDto.builder()
+                        .id(services.getId())
+                        .name(services.getName())
+                        .description(services.getDescription())
+                        .price(services.getPrice())
+                        .duration_minutes(services.getDuration_minutes())
+                        .created(services.getCreated())
+                        .category(services.getCategory())
+                        .build())
+                .toList();
+    }
     }
