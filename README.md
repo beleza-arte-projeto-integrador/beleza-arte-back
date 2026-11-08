@@ -142,16 +142,26 @@ Todos começam com `http://localhost:8081/v1/api/salao`. Para testar, use o [Pos
 | GET | `/searchSpecialty` | `?specialty=Cabeleireira` | Busca por especialidade |
 | GET | `/searchCreated` | `?created=2026-11-03T10:00:00` | Busca por data de cadastro |
 
-Exemplo de corpo para cadastrar:
+Exemplo de corpo para cadastrar (os campos da tela de cadastro de profissional do front-end):
 
 ```json
 {
-  "name": "Anna",
+  "name": "Anna Souza",
+  "cpf": "529.982.247-25",
+  "phone": "(61) 99999-9999",
+  "email": "anna@email.com",
   "specialty": "Cabeleireira",
-  "phone": "61999999999",
-  "email": "anna@email.com"
+  "experienceYears": 5,
+  "username": "anna",
+  "password": "Senha123"
 }
 ```
+
+- **CPF:** pode vir com ou sem máscara; no banco ficam só os 11 números.
+- **CPF, e-mail e usuário** não podem repetir.
+- **Status:** `active` começa como `true` (ativo). Para inativar, mande `"active": false` na atualização.
+- **Senha:** não volta nas respostas. Na atualização, se a senha vier vazia, a senha atual é mantida.
+- **Experiência:** número de anos (`experienceYears`).
 
 ### Clients
 

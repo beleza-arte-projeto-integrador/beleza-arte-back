@@ -16,6 +16,8 @@ import java.util.Optional;
 @Service
 public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateProfessionalsUseCase, DeleteProfessionalsUseCase, SearchEmailProfessionalsUseCase, SearchNameProfessionalsUseCase, SearchPhoneProfessionalsUseCase, SearchSpecialtyProfessionalsUseCase, SearchCreatedProfessionalsUseCase {
 
+    private static final String NOT_FOUND = "Could not find professional!, The requested professional was not found in the system!";
+
     @Autowired
     private CreateProfessionalsPort createProfessionalsPort;
     @Autowired
@@ -36,27 +38,33 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
     private ProfessionalsRepository professionalsRepository;
 
 
-
     @Override
     public ProfessionalsDto createProfessionals(ProfessionalsDto professionalsDto) {
-        Professionals professionalsEntity = Professionals.builder()
-                .id(professionalsDto.getId())
-                .name(professionalsDto.getName())
-                .specialty(professionalsDto.getSpecialty())
-                .phone(professionalsDto.getPhone())
-                .email(professionalsDto.email)
-                .build();
+        Professionals professionalsEntity = toEntity(professionalsDto);
+        professionalsEntity.setId(null); // o id é gerado pelo banco
+        professionalsEntity.setCreated(null); // a data de cadastro é gerada automaticamente
+
+        // Todo profissional novo começa ativo (no front, o status inicial é "Ativo").
+        if (professionalsEntity.getActive() == null) {
+            professionalsEntity.setActive(true);
+        }
+
+        validateRequiredFields(professionalsEntity);
+
+        // CPF, e-mail e usuário não podem repetir.
+        if (professionalsEntity.getCpf() != null && professionalsRepository.existsByCpf(professionalsEntity.getCpf())) {
+            throw new BusinessOutboundException("Could not create professional, A professional with this CPF is already registered");
+        }
+        if (professionalsEntity.getEmail() != null && professionalsRepository.existsByEmail(professionalsEntity.getEmail())) {
+            throw new BusinessOutboundException("Could not create professional, A professional with this email is already registered");
+        }
+        if (professionalsEntity.getUsername() != null && professionalsRepository.existsByUsername(professionalsEntity.getUsername())) {
+            throw new BusinessOutboundException("Could not create professional, This username is already in use");
+        }
+
         try {
             Optional<Professionals> professionalsSaved = createProfessionalsPort.create(professionalsEntity);
-
-            return ProfessionalsDto.builder()
-                    .id(professionalsSaved.get().getId())
-                    .name(professionalsSaved.get().getName())
-                    .specialty(professionalsSaved.get().getSpecialty())
-                    .phone(professionalsSaved.get().getPhone())
-                    .email(professionalsSaved.get().getEmail())
-                    .created(professionalsSaved.get().getCreated())
-                    .build();
+            return toDto(professionalsSaved.get());
         } catch (Exception e){
             throw  new BusinessOutboundException("Could not create professional, Check if the professional is already registered");
         }
@@ -75,118 +83,141 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
 
     @Override
     public List<ProfessionalsDto> searchEmail(String email) {
-        List<Professionals> professionals = searchEmailProfessionalsPort.searchEmail(email);
-
-        if (!professionals.isEmpty()){
-            return professionals.stream().map(professional -> ProfessionalsDto.builder()
-                    .id(professional.getId())
-                    .name(professional.getName())
-                    .specialty(professional.getSpecialty())
-                    .phone(professional.getPhone())
-                    .email(professional.getEmail())
-                    .created(professional.getCreated())
-                    .build())
-                    .toList();
-        } else {
-            throw  new BusinessOutboundException("Could not find professional!, The requested professional was not found in the system!");
-        }
+        return toDtoListOrNotFound(searchEmailProfessionalsPort.searchEmail(email));
     }
 
     @Override
     public List<ProfessionalsDto> searchName(String name) {
-        List<Professionals> professionals = searchNameProfessionalsPort.searchName(name);
-
-        if (!professionals.isEmpty()){
-            return professionals.stream().map(professional -> ProfessionalsDto.builder()
-                    .id(professional.getId())
-                    .name(professional.getName())
-                    .specialty(professional.getSpecialty())
-                    .phone(professional.getPhone())
-                    .email(professional.getEmail())
-                    .created(professional.getCreated())
-                    .build())
-                    .toList();
-        } else {
-            throw new BusinessOutboundException("Could not find professional!, The requested professional was not found in the system!");
-        }
+        return toDtoListOrNotFound(searchNameProfessionalsPort.searchName(name));
     }
 
     @Override
     public List<ProfessionalsDto> searchPhone(String phone) {
-        List<Professionals> professionals = searchPhoneProfessionalsPort.searchPhone(phone);
-
-        if (!professionals.isEmpty()){
-            return professionals.stream().map(professional -> ProfessionalsDto.builder()
-                    .id(professional.getId())
-                    .name(professional.getName())
-                    .specialty(professional.getSpecialty())
-                    .phone(professional.getPhone())
-                    .email(professional.getEmail())
-                    .created(professional.getCreated())
-                    .build())
-                    .toList();
-        }
-        else{
-            throw new BusinessOutboundException("Could not find professional!, The requested professional was not found in the system!");
-        }
+        return toDtoListOrNotFound(searchPhoneProfessionalsPort.searchPhone(phone));
     }
 
     @Override
     public List<ProfessionalsDto> searchSpecialty(String specialty) {
-        List<Professionals> professionals = searchSpecialtyProfessionalsPort.searchSpecialty(specialty);
-
-        if (!professionals.isEmpty()){
-            return professionals.stream().map(professional -> ProfessionalsDto.builder()
-                    .id(professional.getId())
-                    .name(professional.getName())
-                    .specialty(professional.getSpecialty())
-                    .phone(professional.getPhone())
-                    .email(professional.getEmail())
-                    .created(professional.getCreated())
-                    .build())
-                    .toList();
-        }
-        else{
-            throw new BusinessOutboundException("Could not find professional!, The requested professional was not found in the system!");
-        }
+        return toDtoListOrNotFound(searchSpecialtyProfessionalsPort.searchSpecialty(specialty));
     }
 
     @Override
     public ProfessionalsDto updateProfessionals(ProfessionalsDto professionalsDto) {
-        Professionals professionalsEntity = Professionals.builder()
-                .id(professionalsDto.getId())
-                .name(professionalsDto.getName())
-                .specialty(professionalsDto.getSpecialty())
-                .phone(professionalsDto.getPhone())
-                .email(professionalsDto.email)
-                .created(professionalsDto.created)
-                .build();
-        Optional<Professionals> professionalUpdated = updateProfessionalsPort.update(professionalsEntity);
+        if (professionalsDto.getId() == null) {
+            throw new BusinessOutboundException("Could not update professional, The professional id is required");
+        }
 
-        if (professionalUpdated == null){
+        Optional<Professionals> existing = professionalsRepository.findById(professionalsDto.getId());
+        if (existing.isEmpty()) {
             throw new BusinessOutboundException("Could not update professional, Check if the professional exists");
         }
 
-        return ProfessionalsDto.builder()
-                .id(professionalUpdated.get().getId())
-                .name(professionalUpdated.get().getName())
-                .specialty(professionalUpdated.get().getSpecialty())
-                .phone(professionalUpdated.get().getPhone())
-                .email(professionalUpdated.get().getEmail())
-                .created(professionalUpdated.get().getCreated())
-                .build();
+        Professionals professionalsEntity = toEntity(professionalsDto);
+
+        // Mantém o que não veio no JSON:
+        // - a data de cadastro nunca muda;
+        // - senha vazia = mantém a senha atual (igual à tela de perfil do front);
+        // - status não informado = mantém o atual.
+        professionalsEntity.setCreated(existing.get().getCreated());
+        if (professionalsEntity.getPassword() == null) {
+            professionalsEntity.setPassword(existing.get().getPassword());
+        }
+        if (professionalsEntity.getActive() == null) {
+            professionalsEntity.setActive(existing.get().getActive());
+        }
+
+        validateRequiredFields(professionalsEntity);
+
+        Integer id = professionalsEntity.getId();
+        if (professionalsEntity.getCpf() != null && professionalsRepository.existsByCpfAndIdNot(professionalsEntity.getCpf(), id)) {
+            throw new BusinessOutboundException("Could not update professional, Another professional is already registered with this CPF");
+        }
+        if (professionalsEntity.getEmail() != null && professionalsRepository.existsByEmailAndIdNot(professionalsEntity.getEmail(), id)) {
+            throw new BusinessOutboundException("Could not update professional, Another professional is already registered with this email");
+        }
+        if (professionalsEntity.getUsername() != null && professionalsRepository.existsByUsernameAndIdNot(professionalsEntity.getUsername(), id)) {
+            throw new BusinessOutboundException("Could not update professional, This username is already in use");
+        }
+
+        Optional<Professionals> professionalUpdated = updateProfessionalsPort.update(professionalsEntity);
+
+        if (professionalUpdated == null || professionalUpdated.isEmpty()){
+            throw new BusinessOutboundException("Could not update professional, Check if the professional exists");
+        }
+
+        return toDto(professionalUpdated.get());
     }
 
     @Override
     public List<ProfessionalsDto> professionalCreated(LocalDateTime created) {
         List<Professionals> professionals = searchCreatedProfessionalsPort.professionalCreated(created);
-        return professionals.stream().map(professionals1 -> ProfessionalsDto.builder()
-                .created(professionals1.getCreated())
-                        .id(professionals1.getId())
-                        .name(professionals1.getName())
-                        .specialty(professionals1.getSpecialty())
-                        .phone(professionals1.getPhone())
-                        .email(professionals1.getEmail())
-                .build()).toList();
+        return professionals.stream().map(this::toDto).toList();
+    }
+
+    // ---------------------------------------------------------------
+    // Métodos auxiliares
+    // ---------------------------------------------------------------
+
+    private void validateRequiredFields(Professionals professional) {
+        if (professional.getName() == null) {
+            throw new BusinessOutboundException("Invalid professional, The name is required");
+        }
+        if (professional.getCpf() != null && professional.getCpf().length() != 11) {
+            throw new BusinessOutboundException("Invalid professional, The CPF must have 11 digits");
+        }
+    }
+
+    private List<ProfessionalsDto> toDtoListOrNotFound(List<Professionals> professionals) {
+        if (professionals.isEmpty()) {
+            throw new BusinessOutboundException(NOT_FOUND);
+        }
+        return professionals.stream().map(this::toDto).toList();
+    }
+
+    // JSON -> entidade (o que vai para o banco).
+    private Professionals toEntity(ProfessionalsDto dto) {
+        return Professionals.builder()
+                .id(dto.getId())
+                .name(blankToNull(dto.getName()))
+                .specialty(dto.getSpecialty())
+                .phone(dto.getPhone())
+                .email(blankToNull(dto.getEmail()))
+                .cpf(onlyDigits(dto.getCpf()))
+                .experienceYears(dto.getExperienceYears())
+                .username(blankToNull(dto.getUsername()))
+                .password(blankToNull(dto.getPassword()))
+                .active(dto.getActive())
+                .build();
+    }
+
+    // Entidade -> JSON de resposta. A senha não é devolvida.
+    private ProfessionalsDto toDto(Professionals professional) {
+        return ProfessionalsDto.builder()
+                .id(professional.getId())
+                .name(professional.getName())
+                .specialty(professional.getSpecialty())
+                .phone(professional.getPhone())
+                .email(professional.getEmail())
+                .cpf(professional.getCpf())
+                .experienceYears(professional.getExperienceYears())
+                .username(professional.getUsername())
+                .active(professional.getActive())
+                .created(professional.getCreated())
+                .updated(professional.getUpdated())
+                .build();
+    }
+
+    // O front manda o CPF com máscara ("529.982.247-25"); no banco ficam só os 11 números.
+    private String onlyDigits(String value) {
+        if (value == null) {
+            return null;
+        }
+        String digits = value.replaceAll("\\D", "");
+        return digits.isEmpty() ? null : digits;
+    }
+
+    // Texto vazio vira null, para não gravar "" em colunas únicas (e-mail, usuário).
+    private String blankToNull(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 }

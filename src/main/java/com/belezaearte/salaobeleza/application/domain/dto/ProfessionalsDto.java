@@ -17,5 +17,12 @@ public class ProfessionalsDto {
  public String specialty;
  public String phone;
  public String email;
+ public String cpf;
+ public Integer experienceYears;
+ public String username;
+ // Só é usada no cadastro e na edição; não volta nas respostas da API.
+ public String password;
+ public Boolean active;
  public LocalDateTime created;
+ public LocalDateTime updated;
 }
