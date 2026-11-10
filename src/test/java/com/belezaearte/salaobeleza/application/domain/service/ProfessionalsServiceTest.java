@@ -9,9 +9,12 @@ import com.belezaearte.salaobeleza.exception.BusinessOutboundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -36,8 +39,12 @@ public class ProfessionalsServiceTest {
     @Mock
     private ProfessionalsRepository professionalsRepository;
 
+    // Encoder de verdade, para conferir que a senha é gravada como hash BCrypt.
+    @Spy
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @Test
-    @DisplayName("A new professional is saved with the CPF digits only, active, and the password is not returned.")
+    @DisplayName("A new professional is saved with the CPF digits only, active, the password hashed, and the password is not returned.")
     void createProfessional() {
         when(createProfessionalsPort.create(any())).thenAnswer(invocation -> {
             Professionals p = invocation.getArgument(0);
@@ -53,11 +60,45 @@ public class ProfessionalsServiceTest {
         verify(createProfessionalsPort).create(saved.capture());
         assertEquals("52998224725", saved.getValue().getCpf());
         assertEquals(true, saved.getValue().getActive());
-        assertEquals("Senha123", saved.getValue().getPassword());
+        assertNotEquals("Senha123", saved.getValue().getPassword());
+        assertTrue(passwordEncoder.matches("Senha123", saved.getValue().getPassword()));
 
         assertEquals(1, result.getId());
         assertEquals(5, result.getExperienceYears());
         assertNull(result.getPassword());
+        assertEquals("***.982.247-**", result.getCpf());
+    }
+
+    @Test
+    @DisplayName("Updating with a new password saves only its hash.")
+    void updateHashesNewPassword() {
+        Professionals existing = Professionals.builder().id(1).name("Anna").password("hashAntigo").active(true).build();
+        when(professionalsRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(updateProfessionalsPort.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+
+        professionalsService.updateProfessionals(
+                ProfessionalsDto.builder().id(1).name("Anna").password("NovaSenha1").build());
+
+        ArgumentCaptor<Professionals> saved = ArgumentCaptor.forClass(Professionals.class);
+        verify(updateProfessionalsPort).update(saved.capture());
+        assertNotEquals("NovaSenha1", saved.getValue().getPassword());
+        assertTrue(passwordEncoder.matches("NovaSenha1", saved.getValue().getPassword()));
+    }
+
+    @Test
+    @DisplayName("Updating with the masked CPF that the API returned keeps the current CPF.")
+    void updateKeepsCpfWhenMasked() {
+        Professionals existing = Professionals.builder().id(1).name("Anna").cpf("52998224725").active(true).build();
+        when(professionalsRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(updateProfessionalsPort.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+
+        ProfessionalsDto result = professionalsService.updateProfessionals(
+                ProfessionalsDto.builder().id(1).name("Anna").cpf("***.982.247-**").build());
+
+        ArgumentCaptor<Professionals> saved = ArgumentCaptor.forClass(Professionals.class);
+        verify(updateProfessionalsPort).update(saved.capture());
+        assertEquals("52998224725", saved.getValue().getCpf());
+        assertEquals("***.982.247-**", result.getCpf());
     }
 
     @Test
@@ -93,6 +134,7 @@ public class ProfessionalsServiceTest {
         ArgumentCaptor<Professionals> saved = ArgumentCaptor.forClass(Professionals.class);
         verify(updateProfessionalsPort).update(saved.capture());
         assertEquals("SenhaAntiga1", saved.getValue().getPassword());
+        verify(passwordEncoder, never()).encode(any());
         assertEquals(false, saved.getValue().getActive());
         assertEquals(created, result.getCreated());
         assertEquals("Anna Souza", result.getName());

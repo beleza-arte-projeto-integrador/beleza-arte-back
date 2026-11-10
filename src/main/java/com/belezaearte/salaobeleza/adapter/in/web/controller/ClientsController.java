@@ -1,5 +1,6 @@
 package com.belezaearte.salaobeleza.adapter.in.web.controller;
 
+import com.belezaearte.salaobeleza.application.domain.dto.ClientsDataExportDto;
 import com.belezaearte.salaobeleza.application.domain.dto.ClientsDto;
 import com.belezaearte.salaobeleza.application.port.in.Clients.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,5 +104,31 @@ public class ClientsController {
     public ResponseEntity<List<ClientsDto>> searchCreatedClients(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime created) {
         return ResponseEntity.ok(searchCreatedClientsUseCase.searchCreatedClients(created));
+    }
+
+    // LGPD: devolve todos os dados que o salão guarda sobre o cliente.
+    @Autowired
+    private ExportClientsDataUseCase exportClientsDataUseCase;
+
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/exportClientsData",
+            produces = {"application/json"}
+    )
+    public ResponseEntity<ClientsDataExportDto> exportClientsData(@RequestParam Integer id) {
+        return ResponseEntity.ok(exportClientsDataUseCase.exportClientsData(id));
+    }
+
+    // LGPD: apaga os dados pessoais do cliente e mantém o histórico de agendamentos.
+    @Autowired
+    private AnonymizeClientsUseCase anonymizeClientsUseCase;
+
+    @RequestMapping(
+            method = RequestMethod.PUT,
+            value = "/anonymizeClients",
+            produces = {"application/json"}
+    )
+    public ClientsDto anonymizeClients(@RequestParam Integer id) {
+        return anonymizeClientsUseCase.anonymizeClients(id);
     }
 }

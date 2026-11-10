@@ -7,6 +7,7 @@ import com.belezaearte.salaobeleza.application.port.in.Professionals.*;
 import com.belezaearte.salaobeleza.application.port.out.professionalsPort.*;
 import com.belezaearte.salaobeleza.exception.BusinessOutboundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,6 +37,8 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
     private SearchCreatedProfessionalsPort searchCreatedProfessionalsPort;
     @Autowired
     private ProfessionalsRepository professionalsRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -50,6 +53,9 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
         }
 
         validateRequiredFields(professionalsEntity);
+
+        // LGPD: a senha é gravada só como hash (BCrypt), nunca a senha original.
+        professionalsEntity.setPassword(hashPassword(professionalsEntity.getPassword()));
 
         // CPF, e-mail e usuário não podem repetir.
         if (professionalsEntity.getCpf() != null && professionalsRepository.existsByCpf(professionalsEntity.getCpf())) {
@@ -117,10 +123,17 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
         // Mantém o que não veio no JSON:
         // - a data de cadastro nunca muda;
         // - senha vazia = mantém a senha atual (igual à tela de perfil do front);
-        // - status não informado = mantém o atual.
+        // - status não informado = mantém o atual;
+        // - CPF mascarado (como sai nas respostas, ex: "***.982.247-**") = mantém o CPF atual.
         professionalsEntity.setCreated(existing.get().getCreated());
         if (professionalsEntity.getPassword() == null) {
             professionalsEntity.setPassword(existing.get().getPassword());
+        } else {
+            // Senha nova: grava só o hash (LGPD).
+            professionalsEntity.setPassword(hashPassword(professionalsEntity.getPassword()));
+        }
+        if (isMaskedCpf(professionalsDto.getCpf())) {
+            professionalsEntity.setCpf(existing.get().getCpf());
         }
         if (professionalsEntity.getActive() == null) {
             professionalsEntity.setActive(existing.get().getActive());
@@ -190,7 +203,7 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
                 .build();
     }
 
-    // Entidade -> JSON de resposta. A senha não é devolvida.
+    // Entidade -> JSON de resposta. A senha não é devolvida e o CPF sai mascarado (LGPD).
     private ProfessionalsDto toDto(Professionals professional) {
         return ProfessionalsDto.builder()
                 .id(professional.getId())
@@ -198,7 +211,7 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
                 .specialty(professional.getSpecialty())
                 .phone(professional.getPhone())
                 .email(professional.getEmail())
-                .cpf(professional.getCpf())
+                .cpf(maskCpf(professional.getCpf()))
                 .experienceYears(professional.getExperienceYears())
                 .username(professional.getUsername())
                 .active(professional.getActive())
@@ -214,6 +227,24 @@ public class ProfessionalsService implements CreateProfessionalsUseCase, UpdateP
         }
         String digits = value.replaceAll("\\D", "");
         return digits.isEmpty() ? null : digits;
+    }
+
+    private String hashPassword(String password) {
+        return password == null ? null : passwordEncoder.encode(password);
+    }
+
+    // LGPD (minimização): a API não devolve o CPF inteiro, só os dígitos do meio,
+    // o suficiente para a pessoa conferir. Ex: "52998224725" -> "***.982.247-**".
+    private String maskCpf(String cpf) {
+        if (cpf == null || cpf.length() != 11) {
+            return null;
+        }
+        return "***." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-**";
+    }
+
+    // O front pode mandar de volta o CPF mascarado que recebeu na busca.
+    private boolean isMaskedCpf(String cpf) {
+        return cpf != null && cpf.contains("*");
     }
 
     // Texto vazio vira null, para não gravar "" em colunas únicas (e-mail, usuário).
