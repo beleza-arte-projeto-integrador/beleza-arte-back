@@ -44,7 +44,18 @@ cd beleza-arte-back
 
 Se você já tem o projeto, só atualize: `git checkout main` e depois `git pull`.
 
-**2.** Rode a aplicação:
+**2.** Configure a senha do banco (só na primeira vez). Copie o arquivo `.env.example` para `.env`:
+
+| Terminal | Comando |
+|---|---|
+| Git Bash, Linux ou Mac | `cp .env.example .env` |
+| PowerShell ou CMD (Windows) | `copy .env.example .env` |
+
+Abra o `.env` e troque os valores de exemplo (`DB_URL`, `DB_USERNAME` e `DB_PASSWORD`) pelos dados do Supabase (peça para alguém do grupo). O `.env` **não vai para o git**, então a senha não fica no repositório.
+
+> Se preferir, você pode definir essas três como variáveis de ambiente em vez de usar o `.env`. Sem elas, a aplicação não consegue conectar no banco.
+
+**3.** Rode a aplicação:
 
 | Terminal | Comando |
 |---|---|
@@ -53,7 +64,7 @@ Se você já tem o projeto, só atualize: `git checkout main` e depois `git pull
 
 A primeira execução demora alguns minutos (ela baixa as dependências). Nas próximas é rápida.
 
-**3.** Quando aparecer no terminal a linha `Started SalaobelezaApplication`, a API está no ar em:
+**4.** Quando aparecer no terminal a linha `Started SalaobelezaApplication`, a API está no ar em:
 
 ```
 http://localhost:8081/v1/api/salao
