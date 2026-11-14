@@ -20,7 +20,7 @@ public class ServicesController {
    private CreateServicesUseCase createServicesUseCase;
 
     @RequestMapping(
-            method = RequestMethod.PUT,
+            method = RequestMethod.POST,
             value = "/createServices",
             produces = {"application/json"},
             consumes = {"application/json"}
@@ -45,7 +45,7 @@ public class ServicesController {
     private UpdateServicesUseCase updateServicesUseCase;
 
     @RequestMapping(
-            method = RequestMethod.POST,
+            method = RequestMethod.PUT,
             value = "/updateServices",
             produces = {"application/json"},
             consumes = {"application/json"}
