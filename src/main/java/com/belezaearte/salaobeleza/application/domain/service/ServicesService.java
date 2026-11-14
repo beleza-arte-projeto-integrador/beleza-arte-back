@@ -19,7 +19,9 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
 
     @Override
     public ServicesDto create (ServicesDto servicesDto){
-        if(servicesDto.getName() == null || servicesDto.getDescription() == null || servicesDto.getPrice() == null || servicesDto.getDuration_minutes() == null || servicesDto.getCategory()==null || servicesDto.getCreated() == null){
+
+        if(servicesDto.getName() == null || servicesDto.getDescription() == null || servicesDto.getPrice() == null || servicesDto.getDuration_minutes() == null || servicesDto.getCategory()==null ){
+
             throw new BusinessOutboundException("Erro: Campo não preenchido, por favor verifique se preencheu os dados corretamente");
         }
         Services servicesEntity = Services.builder()
@@ -39,6 +41,7 @@ public class ServicesService implements CreateServicesUseCase,DeleteServicesUseC
                 .description(serviceSaved.getDescription())
                 .price(serviceSaved.getPrice())
                 .duration_minutes(serviceSaved.getDuration_minutes())
+                .created(serviceSaved.getCreated())
                 .category(serviceSaved.getCategory())
                 .created(serviceSaved.getCreated())
                 .build();
