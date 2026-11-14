@@ -7,5 +7,5 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface SearchPriceUseCase {
-    List<AppointmentsItemsDto> searchPrice (Integer price);
+    List<AppointmentsItemsDto> searchPrice (BigDecimal price);
 }

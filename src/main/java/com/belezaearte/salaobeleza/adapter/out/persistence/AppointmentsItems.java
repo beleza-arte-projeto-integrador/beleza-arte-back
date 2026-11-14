@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
 @Data
 @Entity
 @Builder
@@ -31,11 +34,11 @@ public class AppointmentsItems {
     private Integer resource_id;
 
     @Column(name= "start_at", nullable = false)
-    private Integer start_at;
+    private OffsetDateTime start_at;
 
     @Column(name= "end_at", nullable = false)
-    private Integer end_at;
+    private OffsetDateTime end_at;
 
     @Column(name= "price", nullable = false)
-    private Integer price;
+    private BigDecimal price;
 }
