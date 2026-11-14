@@ -245,5 +245,4 @@ public class ServicesServiceTest {
         Assertions.assertEquals(searchCreation,result.getCreated());
         Assertions.assertEquals("Cabelo", result.getCategory());
     }
-
 }
