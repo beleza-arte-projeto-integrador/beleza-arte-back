@@ -93,7 +93,44 @@ public class AppointmentsItemsAdapterTest {
 
             Assertions.assertEquals(create,result);
         }
+        @Test
+    void SearchStartDate(){
+    OffsetDateTime searchStartDate = OffsetDateTime.parse("2026-07-25T11:06:00.000000Z");
 
+    AppointmentsItems fakeBank = AppointmentsItems.builder()
+            .id(38)
+            .price(BigDecimal.valueOf(92.37))
+            .start_at(searchStartDate)
+            .end_at(OffsetDateTime.parse("2026-07-25T13:30:00.000000Z"))
+            .build();
+
+            Mockito.when(appointmentsItemsRepository.findAll(Mockito.any(Example.class)))
+            .thenReturn(List.of(fakeBank));
+
+    List<AppointmentsItems> result = appointmentsItemsAdapter.SearchStartDate(searchStartDate);
+
+            Assertions.assertEquals(searchStartDate,result.get(0).getStart_at());
+            Assertions.assertNotNull("Erro: Resultado nulo");
+}
+    @Test
+    void searchEndDate(){
+        OffsetDateTime searchEndDate = OffsetDateTime.parse("2026-10-31T06:06:06.000000Z");
+
+        AppointmentsItems fakeBank = AppointmentsItems.builder()
+                .id(38)
+                .price(BigDecimal.valueOf(92.37))
+                .start_at(OffsetDateTime.parse("2026-10-31T09:09:09.000000Z"))
+                .end_at(searchEndDate)
+                .build();
+
+        Mockito.when(appointmentsItemsRepository.findAll(Mockito.any(Example.class)))
+                .thenReturn(List.of(fakeBank));
+
+        List<AppointmentsItems> result = appointmentsItemsAdapter.searchEndDate(searchEndDate);
+
+        Assertions.assertEquals(searchEndDate,result.get(0).getEnd_at());
+        Assertions.assertNotNull("Erro: Resultado nulo");
+    }
     }
 
 
