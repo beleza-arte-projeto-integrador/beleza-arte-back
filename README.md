@@ -15,7 +15,8 @@ API do sistema de agendamento para salões de beleza de pequeno e médio porte, 
 3. [Banco de dados](#3-banco-de-dados)
 4. [Como o código está organizado](#4-como-o-código-está-organizado)
 5. [Endpoints disponíveis](#5-endpoints-disponíveis)
-6. [Como contribuir (Git e Pull Requests)](#6-como-contribuir-git-e-pull-requests)
+6. [Proteção de dados (LGPD)](#6-proteção-de-dados-lgpd)
+7. [Como contribuir (Git e Pull Requests)](#7-como-contribuir-git-e-pull-requests)
 
 ---
 
@@ -168,10 +169,10 @@ Exemplo de corpo para cadastrar (os campos da tela de cadastro de profissional d
 }
 ```
 
-- **CPF:** pode vir com ou sem máscara; no banco ficam só os 11 números.
+- **CPF:** pode vir com ou sem máscara; no banco ficam só os 11 números. Nas respostas ele sai **mascarado** (`***.982.247-**`). Na atualização, se o CPF vier mascarado assim, o CPF atual é mantido.
 - **CPF, e-mail e usuário** não podem repetir.
 - **Status:** `active` começa como `true` (ativo). Para inativar, mande `"active": false` na atualização.
-- **Senha:** não volta nas respostas. Na atualização, se a senha vier vazia, a senha atual é mantida.
+- **Senha:** é gravada **criptografada** (hash BCrypt) e não volta nas respostas. Na atualização, se a senha vier vazia, a senha atual é mantida.
 - **Experiência:** número de anos (`experienceYears`).
 
 ### Clients
@@ -187,6 +188,8 @@ Os caminhos de Clients terminam em `Clients` porque `/searchName`, `/searchEmail
 | GET | `/searchPhoneClients` | `?phone=11999999999` | Busca por telefone |
 | GET | `/searchEmailClients` | `?email=ana@email.com` | Busca por e-mail (sem diferenciar maiúsculas) |
 | GET | `/searchCreatedClients` | `?created=2026-11-03T10:00:00` | Busca por data de cadastro |
+| GET | `/exportClientsData` | `?id=1` | Devolve todos os dados guardados do cliente (LGPD) |
+| PUT | `/anonymizeClients` | `?id=1` | Apaga os dados pessoais do cliente e mantém os agendamentos (LGPD) |
 
 Exemplo de corpo para cadastrar (os mesmos campos da tela de cadastro do front-end):
 
@@ -200,7 +203,25 @@ Exemplo de corpo para cadastrar (os mesmos campos da tela de cadastro do front-e
 
 ---
 
-## 6. Como contribuir (Git e Pull Requests)
+## 6. Proteção de dados (LGPD)
+
+O sistema guarda dados pessoais de clientes (nome, telefone, e-mail) e de profissionais (nome, CPF, telefone, e-mail, usuário e senha). A Lei Geral de Proteção de Dados (Lei 13.709/2018) exige que esses dados sejam protegidos e que o dono dos dados (o *titular*) possa exercer os direitos dele. O que o back-end faz:
+
+| O que | Como | Artigo da LGPD |
+|---|---|---|
+| **Senha criptografada** | A senha do profissional é gravada só como hash BCrypt (classe `PasswordConfig`). Nem quem tem acesso ao banco consegue ver a senha original | Art. 46 (segurança) |
+| **CPF mascarado** | A API nunca devolve o CPF inteiro, só `***.982.247-**` | Art. 6º, III (necessidade) |
+| **Senha fora das respostas** | A senha nunca volta no JSON | Art. 46 (segurança) |
+| **Cópia dos dados** | `GET /exportClientsData?id=1` devolve tudo o que o salão guarda sobre o cliente e para que os dados são usados | Art. 9º e art. 18, II (acesso) |
+| **Eliminação dos dados** | `DELETE /deleteClients?id=1` apaga o cliente que não tem agendamentos. Se ele tiver, `PUT /anonymizeClients?id=1` troca nome, telefone e e-mail por valores que não identificam ninguém (`Cliente anonimizado`, `ANON-1`, sem e-mail). Os agendamentos continuam para os relatórios do salão | Art. 18, IV e VI (anonimização e eliminação) |
+
+> **Atenção:** senhas cadastradas **antes** dessa mudança continuam no banco como texto. Elas só passam a ser criptografadas quando forem trocadas (pela atualização do profissional com uma senha nova).
+
+**Ao mexer no código:** não coloque dados pessoais (nome, CPF, telefone, e-mail, senha) em mensagens de log nem em mensagens de erro.
+
+---
+
+## 7. Como contribuir (Git e Pull Requests)
 
 O branch principal é o **`main`**. Ninguém trabalha direto nele: cada tarefa é feita num branch próprio e entra no `main` por um **Pull Request (PR)**.
 

@@ -2,6 +2,7 @@ package com.belezaearte.salaobeleza.application.domain.service;
 
 import com.belezaearte.salaobeleza.adapter.out.persistence.Clients;
 import com.belezaearte.salaobeleza.adapter.out.persistence.repository.ClientsRepository;
+import com.belezaearte.salaobeleza.application.domain.dto.ClientsDataExportDto;
 import com.belezaearte.salaobeleza.application.domain.dto.ClientsDto;
 import com.belezaearte.salaobeleza.application.port.in.Clients.*;
 import com.belezaearte.salaobeleza.application.port.out.clientsPort.*;
@@ -14,9 +15,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCase, DeleteClientsUseCase, SearchNameClientsUseCase, SearchPhoneClientsUseCase, SearchEmailClientsUseCase, SearchCreatedClientsUseCase {
+public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCase, DeleteClientsUseCase, SearchNameClientsUseCase, SearchPhoneClientsUseCase, SearchEmailClientsUseCase, SearchCreatedClientsUseCase, ExportClientsDataUseCase, AnonymizeClientsUseCase {
 
     private static final String NOT_FOUND = "Could not find client!, The requested client was not found in the system!";
+
+    // LGPD (art. 9º): o titular tem direito de saber para que os dados dele são usados.
+    private static final String DATA_PURPOSE = "Name, phone and email are used only to identify the client, "
+            + "manage appointments and send confirmations and reminders.";
+
+    // Valores que substituem os dados pessoais na anonimização.
+    // O telefone é obrigatório e único no banco, por isso vira "ANON-<id>".
+    private static final String ANONYMIZED_NAME = "Cliente anonimizado";
+    private static final String ANONYMIZED_PHONE_PREFIX = "ANON-";
 
     @Autowired
     private CreateClientsPort createClientsPort;
@@ -116,9 +126,44 @@ public class ClientsService implements CreateClientsUseCase, UpdateClientsUseCas
         return toDtoListOrNotFound(searchCreatedClientsPort.searchCreatedClients(created));
     }
 
+    @Override
+    public ClientsDataExportDto exportClientsData(Integer id) {
+        Clients client = findExisting(id, "Could not export client data, Check if the client exists");
+        return ClientsDataExportDto.builder()
+                .client(toDto(client))
+                .purpose(DATA_PURPOSE)
+                .generatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    // Apaga os dados pessoais do cliente sem apagar o cadastro.
+    // Diferente do delete, funciona mesmo quando o cliente tem agendamentos:
+    // o histórico continua existindo para os relatórios do salão, mas não identifica mais ninguém.
+    @Override
+    public ClientsDto anonymizeClients(Integer id) {
+        Clients client = findExisting(id, "Could not anonymize client, Check if the client exists");
+
+        client.setName(ANONYMIZED_NAME);
+        client.setPhone(ANONYMIZED_PHONE_PREFIX + client.getId());
+        client.setEmail(null);
+
+        Optional<Clients> clientUpdated = updateClientsPort.update(client);
+        if (clientUpdated.isEmpty()) {
+            throw new BusinessOutboundException("Could not anonymize client, Check if the client exists");
+        }
+        return toDto(clientUpdated.get());
+    }
+
     // ---------------------------------------------------------------
     // Métodos auxiliares
     // ---------------------------------------------------------------
+
+    private Clients findExisting(Integer id, String errorMessage) {
+        if (id == null) {
+            throw new BusinessOutboundException(errorMessage);
+        }
+        return clientsRepository.findById(id).orElseThrow(() -> new BusinessOutboundException(errorMessage));
+    }
 
     private void validateRequiredFields(ClientsDto clientsDto) {
         if (clientsDto.getName() == null || clientsDto.getName().isBlank()) {
