@@ -132,7 +132,7 @@ Exemplo: `ClientsController` chama `CreateClientsUseCase`, que é implementado p
 | Professionals | Funciona, com teste unitário |
 | Clients | Funciona, com testes unitários |
 | Services | Em andamento no branch `feature/fernanda` |
-| Appointments | Só a estrutura (interfaces) |
+| Appointments | Funciona, com testes unitários |
 
 ---
 
@@ -197,6 +197,49 @@ Exemplo de corpo para cadastrar (os mesmos campos da tela de cadastro do front-e
   "email": "ana@email.com"
 }
 ```
+
+### Appointments
+
+Um agendamento é a **visita** do cliente ao salão. Os serviços da visita (profissional, horário e preço) são os **itens**, cadastrados nos endpoints de `/appointmentsItems` com o `appointment_id` do agendamento. Nas respostas, cada agendamento já vem com a lista `items`.
+
+| Método | Caminho | Parâmetros | O que faz |
+|---|---|---|---|
+| POST | `/createAppointments` | JSON no corpo | Cria o agendamento (o cliente é obrigatório e precisa existir) |
+| PUT | `/updateAppointments` | JSON no corpo (com `id`) | Muda o status e as observações |
+| DELETE | `/deleteAppointments` | `?id=1` | Remove o agendamento e os itens dele (não remove se ele tiver pagamentos) |
+| GET | `/searchClientAppointments` | `?idClient=1` | Agendamentos do cliente |
+| GET | `/searchProfessionalAppointments` | `?idProfessional=1` | Agendamentos com algum serviço desse profissional |
+| GET | `/searchServiceAppointments` | `?idService=1` | Agendamentos com esse serviço |
+| GET | `/searchStatusAppointments` | `?status=AGENDADO` | Busca por status (sem diferenciar maiúsculas) |
+| GET | `/searchNotesAppointments` | `?notes=retoque` | Busca por parte das observações (sem diferenciar maiúsculas) |
+| GET | `/searchPriceAppointments` | `?price=80.00` | Agendamentos com algum serviço desse preço |
+| GET | `/searchDateAppointments` | `?date=2026-11-20` | Agenda do dia: agendamentos com algum serviço nessa data (horário de Brasília) |
+| GET | `/searchTimeAppointments` | `?startAt=2026-11-20T14:00:00-03:00` | Agendamentos com algum serviço começando nesse dia e horário |
+| GET | `/searchCreatedAppointments` | `?created=2026-11-03T10:00:00-03:00` | Busca pela data em que o agendamento foi feito |
+
+Exemplo de corpo para criar:
+
+```json
+{
+  "idClient": 1,
+  "notes": "Cliente prefere atendimento à tarde"
+}
+```
+
+- **Status:** todo agendamento novo começa como `AGENDADO`, mesmo que outro status seja enviado. Depois ele só pode mudar seguindo o ciclo do [dicionário de dados](docs/banco-de-dados.md#appointments--agendamentos): `AGENDADO` → `CONFIRMADO` → `CONCLUIDO`; `AGENDADO` ou `CONFIRMADO` → `CANCELADO`; `CONFIRMADO` → `NAO_COMPARECEU`. `CONCLUIDO`, `CANCELADO` e `NAO_COMPARECEU` não mudam mais.
+- **Cancelamento:** mande `"status": "CANCELADO"` com `cancelledBy` (`CLIENTE` ou `SALAO`) e, se quiser, `cancelReason`. A data do cancelamento é preenchida automaticamente. Para guardar o histórico, prefira cancelar em vez de apagar.
+
+```json
+{
+  "id": 1,
+  "status": "CANCELADO",
+  "cancelledBy": "CLIENTE",
+  "cancelReason": "Imprevisto"
+}
+```
+
+- **Observações:** se `notes` não vier na atualização, as observações atuais são mantidas. Para apagar, mande `"notes": ""`.
+- **Cliente:** o cliente de um agendamento não pode ser trocado.
 
 ---
 
