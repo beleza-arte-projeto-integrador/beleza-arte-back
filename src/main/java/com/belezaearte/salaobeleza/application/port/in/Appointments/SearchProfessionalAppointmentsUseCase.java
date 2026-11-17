@@ -1,12 +1,9 @@
 package com.belezaearte.salaobeleza.application.port.in.Appointments;
 
-import com.belezaearte.salaobeleza.adapter.out.persistence.Clients;
-import com.belezaearte.salaobeleza.adapter.out.persistence.Professionals;
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsDto;
 
 import java.util.List;
 
 public interface SearchProfessionalAppointmentsUseCase {
-    List<AppointmentsDto> searchProfessional (Professionals idProfessional);
-
+    List<AppointmentsDto> searchProfessional (Integer idProfessional);
 }
