@@ -1,0 +1,32 @@
+# Banco PostgreSQL LOCAL para testes (não mexe no Supabase do grupo).
+#
+# Subir:       docker compose up -d --build
+# Ver status:  docker compose ps          (espere "healthy")
+# Desligar:    docker compose down        (mantém os dados)
+# Zerar tudo:  docker compose down -v     (apaga os dados; na próxima subida
+#                                          as tabelas e os dados de teste são recriados)
+#
+# Conexão (Beekeeper, DBeaver ou a aplicação): localhost:5433, banco salaobeleza,
+# usuário dev, senha dev. A porta é 5433 para não brigar com um Postgres
+# instalado no computador (que costuma usar a 5432).
+services:
+  postgres:
+    build: ./docker/postgres
+    image: salaobeleza-db:local
+    container_name: salaobeleza-db
+    environment:
+      POSTGRES_DB: salaobeleza
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d salaobeleza"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

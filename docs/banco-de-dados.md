@@ -211,12 +211,21 @@ Registro do que foi pago em cada agendamento. Permite a conciliação diária de
 | Campo | Tipo | Obrig. | Descrição |
 |---|---|---|---|
 | `id` | INTEGER | ✅ | PK |
-| `appointment_id` | INTEGER | ✅ | FK → `appointments.id` |
-| `amount` | NUMERIC(10,2) | ✅ | Valor pago. Tem que ser maior que zero |
-| `method` | VARCHAR(20) | ✅ | Forma de pagamento: `PIX`, `CARTAO_CREDITO`, `CARTAO_DEBITO`, `DINHEIRO` |
-| `status` | VARCHAR(20) | ✅ | `PENDENTE`, `PAGO` ou `ESTORNADO` (devolvido). Padrão: `PENDENTE` |
+| `appointment_id` | INTEGER | ✅ | FK → `appointments.id`. Um agendamento com pagamento não pode ser apagado |
+| `amount` | NUMERIC(10,2) | ✅ | Valor do pagamento. Tem que ser maior que zero |
+| `method` | VARCHAR(20) | ✅ | Forma de pagamento: `PIX`, `CARTAO_CREDITO`, `CARTAO_DEBITO`, `DINHEIRO`. O pagamento gerado automaticamente começa como `PIX` |
+| `status` | VARCHAR(20) | ✅ | `PENDENTE`, `PAGO`, `CANCELADO` (o agendamento foi cancelado antes do pagamento) ou `ESTORNADO` (foi pago e devolvido). Padrão: `PENDENTE` |
 | `paid_at` | TIMESTAMPTZ | | Quando o pagamento foi confirmado |
 | `created_at` | TIMESTAMPTZ | ✅ | Quando o registro foi criado. Automático |
+
+**Ciclo de vida do `status`:**
+
+```
+PENDENTE ──► PAGO ──► ESTORNADO
+    └──► CANCELADO   (o agendamento foi cancelado)
+```
+
+**Geração automática:** o sistema mantém um pagamento `PENDENTE` por agendamento. Ele é criado ou recalculado sempre que um serviço (`appointment_items`) é adicionado, alterado ou removido, com valor = soma dos serviços − o que já foi `PAGO` − outros `PENDENTE`. Se não sobrar nada a pagar, o pendente é apagado. Quando o agendamento é cancelado, os pagamentos `PENDENTE` dele viram `CANCELADO`.
 
 ---
 

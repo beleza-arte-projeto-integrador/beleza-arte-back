@@ -94,6 +94,32 @@ O banco já tem **dados de teste** (profissionais, serviços, clientes e agendam
 
 > Se aparecer o erro `column ... does not exist`, alguma entidade está com uma coluna que não existe na tabela do Supabase.
 
+### Banco local para testes (Docker)
+
+Para testar sem mexer no Supabase do grupo, dá para subir um PostgreSQL no seu computador, já com as tabelas e os dados de teste. Precisa ter o **Docker** instalado.
+
+```bash
+docker compose up -d --build   # sobe o banco (porta 5433)
+docker compose ps              # espere aparecer "healthy"
+```
+
+Para a aplicação usar esse banco, troque no `.env` as três linhas do banco por:
+
+```
+DB_URL=jdbc:postgresql://localhost:5433/salaobeleza
+DB_USERNAME=dev
+DB_PASSWORD=dev
+```
+
+Para voltar ao Supabase, restaure os valores originais. Para conectar no Beekeeper ou no DBeaver, use: host `localhost`, porta `5433`, banco `salaobeleza`, usuário `dev` e senha `dev` (sem SSL).
+
+| Comando | O que faz |
+|---|---|
+| `docker compose down` | Desliga o banco e mantém os dados |
+| `docker compose down -v` | Desliga e **apaga os dados**. Na próxima subida, tudo é recriado do zero |
+
+As tabelas e os dados ficam em [docker/postgres/init/](docker/postgres/init/). Eles só rodam quando o banco é criado. Se mudar algum script, recrie com `docker compose down -v && docker compose up -d --build`. Quando uma tabela mudar no Supabase, atualize também o `01-estrutura.sql`, para os dois bancos continuarem iguais.
+
 ---
 
 ## 4. Como o código está organizado
@@ -134,6 +160,7 @@ Exemplo: `ClientsController` chama `CreateClientsUseCase`, que é implementado p
 | Clients | Funciona, com testes unitários |
 | Services | Em andamento no branch `feature/fernanda` |
 | Appointments | Funciona, com testes unitários |
+| Payments | Funciona, com testes unitários (geração automática, listagem e resumo) |
 
 ---
 
@@ -243,6 +270,58 @@ Exemplo de corpo para criar:
 
 - **Observações:** se `notes` não vier na atualização, as observações atuais são mantidas. Para apagar, mande `"notes": ""`.
 - **Cliente:** o cliente de um agendamento não pode ser trocado.
+- **Pagamento:** ao cancelar, os pagamentos `PENDENTE` do agendamento viram `CANCELADO`.
+
+### Payments
+
+Não há endpoint para criar pagamento: o pagamento `PENDENTE` (forma `PIX`) é **gerado automaticamente** quando serviços são adicionados a um agendamento em `/appointmentsItems`, e recalculado quando um serviço é alterado ou removido. Detalhes no [dicionário de dados](docs/banco-de-dados.md#payments--pagamentos).
+
+| Método | Caminho | Parâmetros | O que faz |
+|---|---|---|---|
+| GET | `/listPayments` | `?status=PAGO` (opcional) | Lista para a tela de pagamentos do admin, do mais recente para o mais antigo, com cliente, serviços e data do atendimento. Sem `status`, traz todos. Sem resultados, devolve `[]` |
+| GET | `/paymentsSummary` | `?month=2026-11` (opcional, padrão: mês atual) | Valores dos cards da tela de pagamentos |
+| GET | `/searchAppointmentPayments` | `?idAppointment=1` | Pagamentos de um agendamento |
+| GET | `/searchStatusPayments` | `?status=PENDENTE` | Pagamentos com esse status |
+
+Status aceitos (sem diferenciar maiúsculas): `PENDENTE`, `PAGO`, `CANCELADO` e `ESTORNADO`.
+
+Exemplo de item de `/listPayments`:
+
+```json
+{
+  "id": 8,
+  "idAppointment": 8,
+  "clientName": "Maria das Graças",
+  "services": "Escova / Tratamentos",
+  "appointmentDate": "2026-11-20T10:00:00-03:00",
+  "amount": 120.00,
+  "method": "PIX",
+  "status": "CANCELADO",
+  "paidAt": null,
+  "created": "2026-11-14T15:04:38-03:00"
+}
+```
+
+Exemplo de `/paymentsSummary`:
+
+```json
+{
+  "month": "2026-11",
+  "receivedMonth": 530.00,
+  "receivedPreviousMonth": 0,
+  "receivedChangePercent": null,
+  "pendingAmount": 370.00,
+  "pendingAppointments": 2,
+  "receiptRatePercent": 59
+}
+```
+
+| Campo | Card da tela | Como é calculado |
+|---|---|---|
+| `receivedMonth` | Recebido este mês | Soma dos pagamentos `PAGO` com `paid_at` no mês |
+| `receivedChangePercent` | "↑ 16% vs. mês anterior" | Variação em relação a `receivedPreviousMonth`. `null` se o mês anterior não teve recebimentos |
+| `pendingAmount` / `pendingAppointments` | Pagamentos pendentes | Soma dos `PENDENTE` e quantos agendamentos têm pendência |
+| `receiptRatePercent` | Taxa de recebimento | Dos pagamentos criados no mês: `PAGO` ÷ (`PAGO` + `PENDENTE`). `null` se não houver nenhum |
 
 ---
 
