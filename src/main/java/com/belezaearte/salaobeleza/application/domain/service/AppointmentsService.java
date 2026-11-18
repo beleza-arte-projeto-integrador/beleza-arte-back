@@ -7,10 +7,12 @@ import com.belezaearte.salaobeleza.adapter.out.persistence.repository.ClientsRep
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsDto;
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsItemsDto;
 import com.belezaearte.salaobeleza.application.port.in.Appointments.*;
+import com.belezaearte.salaobeleza.application.port.in.Payments.CancelPaymentsUseCase;
 import com.belezaearte.salaobeleza.application.port.out.appointmentsPort.*;
 import com.belezaearte.salaobeleza.exception.BusinessOutboundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -77,6 +79,8 @@ public class AppointmentsService implements CreateAppointmentsUseCase, UpdateApp
     private AppointmentsRepository appointmentsRepository;
     @Autowired
     private ClientsRepository clientsRepository;
+    @Autowired
+    private CancelPaymentsUseCase cancelPaymentsUseCase;
 
     // Cria a visita. Todo agendamento novo começa como AGENDADO.
     // Os serviços da visita são cadastrados depois, em /appointmentsItems, com o id deste agendamento.
@@ -106,6 +110,7 @@ public class AppointmentsService implements CreateAppointmentsUseCase, UpdateApp
 
     // Atualiza as observações e o status. O cliente e a data de criação não mudam.
     @Override
+    @Transactional
     public AppointmentsDto updateAppointments(AppointmentsDto appointmentsDto) {
         if (appointmentsDto.getId() == null) {
             throw new BusinessOutboundException("Could not update appointment, The appointment id is required");
@@ -135,6 +140,9 @@ public class AppointmentsService implements CreateAppointmentsUseCase, UpdateApp
         Optional<Appointments> appointmentUpdated = updateAppointmentsPort.update(appointmentsEntity);
         if (appointmentUpdated.isEmpty()) {
             throw new BusinessOutboundException("Could not update appointment, Check if the appointment exists");
+        }
+        if (CANCELADO.equals(newStatus)) {
+            cancelPaymentsUseCase.cancelPayments(appointmentUpdated.get().getId());
         }
         return toDto(appointmentUpdated.get());
     }

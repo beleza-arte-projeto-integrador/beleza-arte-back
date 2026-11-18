@@ -150,3 +150,4 @@ CREATE TABLE payments (
 );
 
 CREATE INDEX idx_payments_appointment ON payments (appointment_id);
+CREATE INDEX idx_payments_status_paid ON payments (status, paid_at);

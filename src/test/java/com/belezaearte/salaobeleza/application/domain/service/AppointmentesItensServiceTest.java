@@ -2,9 +2,11 @@ package com.belezaearte.salaobeleza.application.domain.service;
 
 import com.belezaearte.salaobeleza.adapter.out.persistence.AppointmentsItems;
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsItemsDto;
+import com.belezaearte.salaobeleza.application.port.in.Payments.GeneratePaymentsUseCase;
 import com.belezaearte.salaobeleza.application.port.out.AppointmentsItemsPort.*;
 import com.belezaearte.salaobeleza.application.port.out.servicesPort.DeleteServicesPort;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class AppointmentesItensServiceTest {
@@ -24,6 +27,12 @@ public class AppointmentesItensServiceTest {
 
     @InjectMocks
     private AppointmentsItemsService appointmentesItensService;
+
+    @Mock
+    GeneratePaymentsUseCase generatePaymentsUseCase;
+
+    @Mock
+    SearchIdAppointmentsItemsPort searchIdAppointmentsItemsPort;
 
     @Mock
     DeleteAppointmentsItemsPort deleteAppointmentsItemsPort;
@@ -35,6 +44,32 @@ public class AppointmentesItensServiceTest {
 
         Mockito.verify(deleteAppointmentsItemsPort,Mockito.times(1)).delete(id);
 
+    }
+
+    @Test
+    @DisplayName("Removing a service recalculates the payment of its appointment.")
+    void deleteRecalculatesPayment() {
+        Mockito.when(searchIdAppointmentsItemsPort.searchId(600))
+                .thenReturn(Optional.of(AppointmentsItems.builder().id(600).appointment_id(32).build()));
+
+        appointmentesItensService.delete(600);
+
+        Mockito.verify(deleteAppointmentsItemsPort).delete(600);
+        Mockito.verify(generatePaymentsUseCase).generatePayments(32);
+    }
+
+    @Test
+    @DisplayName("Moving a service to another appointment recalculates both payments.")
+    void updateToAnotherAppointmentRecalculatesBoth() {
+        AppointmentsItems moved = AppointmentsItems.builder().id(17).appointment_id(40).price(BigDecimal.valueOf(80.00)).build();
+        Mockito.when(searchIdAppointmentsItemsPort.searchId(17))
+                .thenReturn(Optional.of(AppointmentsItems.builder().id(17).appointment_id(32).build()));
+        Mockito.when(updateAppointmentsItemsPort.update(Mockito.any(AppointmentsItems.class))).thenReturn(moved);
+
+        appointmentesItensService.update(AppointmentsItemsDto.builder().id(17).appointment_id(40).price(BigDecimal.valueOf(80.00)).build());
+
+        Mockito.verify(generatePaymentsUseCase).generatePayments(40);
+        Mockito.verify(generatePaymentsUseCase).generatePayments(32);
     }
 
     @Mock
@@ -120,6 +155,7 @@ public class AppointmentesItensServiceTest {
         Assertions.assertEquals(48,result.getResource_id());
         Assertions.assertEquals(start_at,result.getStart_at());
         Assertions.assertEquals(end_at,result.getEnd_at());
+        Mockito.verify(generatePaymentsUseCase).generatePayments(32);
     }
     @Mock
     SearchEndDatePort searchEndDatePort;

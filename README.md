@@ -278,8 +278,10 @@ Não há endpoint para criar pagamento: o pagamento `PENDENTE` (forma `PIX`) é 
 
 | Método | Caminho | Parâmetros | O que faz |
 |---|---|---|---|
+| PUT | `/payPayments` | JSON no corpo (`id` e `method`) | Registra o pagamento: `PENDENTE` → `PAGO`, com a forma de pagamento e a data/hora |
 | GET | `/listPayments` | `?status=PAGO` (opcional) | Lista para a tela de pagamentos do admin, do mais recente para o mais antigo, com cliente, serviços e data do atendimento. Sem `status`, traz todos. Sem resultados, devolve `[]` |
-| GET | `/paymentsSummary` | `?month=2026-11` (opcional, padrão: mês atual) | Valores dos cards da tela de pagamentos |
+| GET | `/searchSummaryPayments` | `?month=2026-11` (opcional, padrão: mês atual) | Valores dos cards da tela de pagamentos |
+| GET | `/searchRevenuePayments` | `?period=DAY` e `&date=2026-11-18` (opcional, padrão: hoje) | Quanto foi recebido no período e a variação em relação ao período anterior |
 | GET | `/searchAppointmentPayments` | `?idAppointment=1` | Pagamentos de um agendamento |
 | GET | `/searchStatusPayments` | `?status=PENDENTE` | Pagamentos com esse status |
 
@@ -302,7 +304,7 @@ Exemplo de item de `/listPayments`:
 }
 ```
 
-Exemplo de `/paymentsSummary`:
+Exemplo de `/searchSummaryPayments`:
 
 ```json
 {
@@ -322,6 +324,39 @@ Exemplo de `/paymentsSummary`:
 | `receivedChangePercent` | "↑ 16% vs. mês anterior" | Variação em relação a `receivedPreviousMonth`. `null` se o mês anterior não teve recebimentos |
 | `pendingAmount` / `pendingAppointments` | Pagamentos pendentes | Soma dos `PENDENTE` e quantos agendamentos têm pendência |
 | `receiptRatePercent` | Taxa de recebimento | Dos pagamentos criados no mês: `PAGO` ÷ (`PAGO` + `PENDENTE`). `null` se não houver nenhum |
+
+**`/searchRevenuePayments`** soma os pagamentos `PAGO` pela data do pagamento (`paid_at`, horário de Brasília):
+
+| `period` | Usado em | Período | Comparado com |
+|---|---|---|---|
+| `DAY` | Painel: card "Receita do dia" | O dia de `date` | O dia anterior |
+| `LAST_7_DAYS` | Relatórios: "Últimos 7 dias" | `date` e os 6 dias antes | Os 7 dias anteriores |
+| `MONTH` | Relatórios: "Este mês" | O mês de `date` | O mês anterior |
+| `YEAR` | Relatórios: "Este ano" | O ano de `date` | O ano anterior |
+
+```json
+{
+  "period": "LAST_7_DAYS",
+  "start": "2026-11-12",
+  "end": "2026-11-18",
+  "received": 220.00,
+  "receivedPrevious": 310.00,
+  "changePercent": -29
+}
+```
+
+`changePercent` é `null` quando o período anterior não teve recebimentos.
+
+**`/payPayments`** registra que o cliente pagou. A forma escolhida na hora substitui a do pendente (que começa como `PIX`). Só pagamentos `PENDENTE` podem ser pagos.
+
+```json
+{
+  "id": 7,
+  "method": "DINHEIRO"
+}
+```
+
+Formas aceitas (sem diferenciar maiúsculas): `PIX`, `CARTAO_CREDITO`, `CARTAO_DEBITO` e `DINHEIRO`. Se depois um serviço for adicionado ao agendamento, um novo `PENDENTE` é gerado só com a diferença.
 
 ---
 

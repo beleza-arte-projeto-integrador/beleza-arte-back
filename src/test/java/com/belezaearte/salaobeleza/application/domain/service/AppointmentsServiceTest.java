@@ -5,6 +5,7 @@ import com.belezaearte.salaobeleza.adapter.out.persistence.AppointmentsItems;
 import com.belezaearte.salaobeleza.adapter.out.persistence.repository.AppointmentsRepository;
 import com.belezaearte.salaobeleza.adapter.out.persistence.repository.ClientsRepository;
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsDto;
+import com.belezaearte.salaobeleza.application.port.in.Payments.CancelPaymentsUseCase;
 import com.belezaearte.salaobeleza.application.port.out.appointmentsPort.*;
 import com.belezaearte.salaobeleza.exception.BusinessOutboundException;
 import org.junit.jupiter.api.DisplayName;
@@ -54,6 +55,9 @@ public class AppointmentsServiceTest {
 
     @Mock
     private ClientsRepository clientsRepository;
+
+    @Mock
+    private CancelPaymentsUseCase cancelPaymentsUseCase;
 
     private Appointments appointment(String status) {
         return Appointments.builder().id(1).clientId(5).status(status).notes("Primeira visita").build();
@@ -112,6 +116,7 @@ public class AppointmentsServiceTest {
 
         assertEquals("CONFIRMADO", result.getStatus());
         assertEquals("Primeira visita", result.getNotes());
+        verify(cancelPaymentsUseCase, never()).cancelPayments(any());
     }
 
     @Test
@@ -127,6 +132,7 @@ public class AppointmentsServiceTest {
         assertEquals("SALAO", result.getCancelledBy());
         assertEquals("Profissional doente", result.getCancelReason());
         assertNotNull(result.getCancelledAt());
+        verify(cancelPaymentsUseCase).cancelPayments(1);
     }
 
     @Test

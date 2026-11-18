@@ -15,8 +15,13 @@ import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class AppointmentsItemsAdapter implements DeleteAppointmentsItemsPort,UpdateAppointmentsItemsPort,CreateAppointmentsItemsPort,SearchPricePort,SearchStartDatePort,SearchEndDatePort {
+public class AppointmentsItemsAdapter implements DeleteAppointmentsItemsPort,UpdateAppointmentsItemsPort,CreateAppointmentsItemsPort,SearchPricePort,SearchStartDatePort,SearchEndDatePort,SearchIdAppointmentsItemsPort {
     private final AppointmentsItemsRepository appointmentsItemsRepository;
+
+    @Override
+    public Optional<AppointmentsItems> searchId(Integer id) {
+        return id == null ? Optional.empty() : appointmentsItemsRepository.findById(id);
+    }
 
     @Override
     @Transactional
