@@ -166,7 +166,30 @@ Exemplo: `ClientsController` chama `CreateClientsUseCase`, que é implementado p
 
 ## 5. Endpoints disponíveis
 
-Todos começam com `http://localhost:8081/v1/api/salao`. Para testar, use o [Postman](https://www.postman.com/), o [Insomnia](https://insomnia.rest/) ou a extensão *REST Client* do VS Code. Os nomes dos campos no JSON estão em **inglês** (`name`, `phone`, `email`…).
+Todos começam com `http://localhost:8081/v1/api/salao`. Os nomes dos campos no JSON estão em **inglês** (`name`, `phone`, `email`…).
+
+### Documentação interativa (Swagger)
+
+Com a aplicação rodando, abra no navegador:
+
+**http://localhost:8081/v1/api/salao/swagger-ui.html**
+
+Como está organizado:
+
+- **Seletor de área** (no canto superior direito, em *Select a definition*): **1. Todos os endpoints**, **2. Cadastros** (Profissionais, Clientes, Serviços e Recursos), **3. Agenda** (Agendamentos e Itens de agendamento) e **4. Financeiro** (Pagamentos).
+- Dentro da área, cada **módulo é um grupo**, que começa fechado. Clique no nome para abrir.
+- Em cada grupo, os endpoints aparecem na ordem **criar → alterar → remover → buscas**.
+- O campo **Filter by tag** filtra os grupos pelo nome.
+
+Cada endpoint mostra o que faz, as regras, os parâmetros e um exemplo de JSON. Para testar sem outro programa, abra um endpoint, clique em **Try it out** (os campos já vêm preenchidos com exemplos), ajuste o que quiser e clique em **Execute**.
+
+- A documentação é **gerada automaticamente a partir dos controllers**: um endpoint novo aparece sozinho.
+- Os textos (resumo, descrição, exemplos de parâmetros e de JSON, e a descrição dos campos) ficam em [`config/OpenApiEndpoints.java`](src/main/java/com/belezaearte/salaobeleza/config/OpenApiEndpoints.java), e não nos controllers. **Criou um endpoint?** Acrescente uma linha `endpoint("MÉTODO /caminho", ...)` no módulo dele. Sem isso, ele aparece no Swagger, mas sem descrição.
+- Os nomes dos grupos e as respostas comuns (204 nos `DELETE`, erros 400 e 422) são configurados em [`config/OpenApiConfig.java`](src/main/java/com/belezaearte/salaobeleza/config/OpenApiConfig.java).
+- O mesmo conteúdo, em formato OpenAPI (JSON), fica em `http://localhost:8081/v1/api/salao/v3/api-docs`. Dá para importar esse endereço no [Postman](https://www.postman.com/) ou no [Insomnia](https://insomnia.rest/) e ter todas as requisições prontas.
+- O Swagger usa o banco configurado no `.env`. Para testar à vontade, prefira o [banco local](#3-banco-de-dados) em vez do Supabase do grupo.
+
+As tabelas abaixo são um resumo rápido, com as regras de cada módulo.
 
 ### Professionals
 

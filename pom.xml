@@ -39,6 +39,15 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<!-- Documentação dos endpoints (Swagger), gerada a partir dos controllers.
+		     Com a aplicação rodando: http://localhost:8081/v1/api/salao/swagger-ui.html
+		     A versão 3.x é a compatível com o Spring Boot 4. -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.1.1</version>
+		</dependency>
+
 		<!-- Só a parte de criptografia do Spring Security (BCrypt), para guardar as senhas com hash.
 		     Não liga login nem bloqueia nenhum endpoint. -->
 		<dependency>
