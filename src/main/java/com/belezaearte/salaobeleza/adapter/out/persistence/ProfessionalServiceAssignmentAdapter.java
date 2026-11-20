@@ -44,7 +44,7 @@ public class ProfessionalServiceAssignmentAdapter implements CreateProfessionalS
         if (professionalServiceAssignmentOptional.isPresent()) {
             return Optional.of(professionalServiceAssignmentRepository.saveAndFlush(updateProfessionalsService));
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 }
