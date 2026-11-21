@@ -17,13 +17,8 @@ import java.util.List;
 public class AppointmentsDto {
     private Integer id;
     private Integer idClient;
-    private String status;
-    private String notes;
     private String cancelledBy;
-    private String cancelReason;
-    private OffsetDateTime cancelledAt;
+    private OffsetDateTime cancelled;
     private OffsetDateTime created;
     private OffsetDateTime updated;
-    // Só nas respostas: os itens são cadastrados pelos endpoints de /appointmentsItems.
-    private List<AppointmentsItemsDto> items;
 }

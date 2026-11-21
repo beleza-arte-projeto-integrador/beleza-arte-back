@@ -30,24 +30,15 @@ public class Appointments {
 
     // Quem agendou (FK -> clients.id).
     @Column(name = "client_id", nullable = false)
-    private Integer clientId;
-
-    // AGENDADO, CONFIRMADO, CONCLUIDO, CANCELADO ou NAO_COMPARECEU.
-    @Column(name = "status", nullable = false)
-    private String status;
-
-    @Column(name = "notes")
-    private String notes;
+    private Integer idClient;
 
     // Preenchidos só quando o agendamento é cancelado.
     @Column(name = "cancelled_by")
     private String cancelledBy;
 
-    @Column(name = "cancel_reason")
-    private String cancelReason;
-
+    @CreationTimestamp
     @Column(name = "cancelled_at")
-    private OffsetDateTime cancelledAt;
+    private OffsetDateTime cancelled;
 
     // Preenchido automaticamente com a data/hora em que o agendamento foi feito.
     // updatable = false: um update nunca muda essa data.
@@ -60,11 +51,4 @@ public class Appointments {
     @Column(name = "updated_at")
     private OffsetDateTime updated;
 
-    // Serviços da visita, em ordem de horário. Só leitura: os itens são criados e
-    // alterados pelo módulo AppointmentsItems (insertable/updatable = false).
-    @OneToMany(fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SUBSELECT)
-    @JoinColumn(name = "appointment_id", insertable = false, updatable = false)
-    @OrderBy("start_at")
-    private List<AppointmentsItems> items;
 }

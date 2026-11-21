@@ -2,8 +2,10 @@ package com.belezaearte.salaobeleza.application.port.in.Appointments;
 
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsDto;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
-public interface SearchStatusAppointmentsUseCase {
-    List<AppointmentsDto> searchStatus (String status);
+public interface SearchUpdatedAppointmentsUseCase {
+    List<AppointmentsDto> searchUpdatedAppointments (OffsetDateTime updated);
+
 }

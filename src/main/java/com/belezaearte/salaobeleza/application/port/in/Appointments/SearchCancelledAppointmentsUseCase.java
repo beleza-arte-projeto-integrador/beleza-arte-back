@@ -2,8 +2,10 @@ package com.belezaearte.salaobeleza.application.port.in.Appointments;
 
 import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsDto;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
-public interface SearchProfessionalAppointmentsUseCase {
-    List<AppointmentsDto> searchProfessional (Integer idProfessional);
+public interface SearchCancelledAppointmentsUseCase {
+    List<AppointmentsDto> searchCancelledAppointments (OffsetDateTime cancelled);
+
 }

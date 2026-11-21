@@ -6,5 +6,5 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface SearchCreatedAppointmentsUseCase {
-    List<AppointmentsDto> searchCreated (OffsetDateTime created);
+    List<AppointmentsDto> searchCreatedAppointments(OffsetDateTime created);
 }

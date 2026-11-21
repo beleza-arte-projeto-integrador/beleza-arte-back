@@ -6,5 +6,5 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface SearchCreatedAppointmentsPort {
-    List<Appointments> searchCreated (OffsetDateTime created);
+    List<Appointments> searchCreatedAppointments (OffsetDateTime created);
 }

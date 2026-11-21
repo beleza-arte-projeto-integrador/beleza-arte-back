@@ -3,16 +3,17 @@ package com.belezaearte.salaobeleza.adapter.out.persistence;
 import com.belezaearte.salaobeleza.adapter.out.persistence.repository.AppointmentsRepository;
 import com.belezaearte.salaobeleza.application.port.out.appointmentsPort.*;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 @AllArgsConstructor
-public class AppointmentsAdapter implements CreateAppointmentsPort, UpdateAppointmentsPort, DeleteAppointmentsPort, SearchClientAppointmentsPort, SearchProfessionalAppointmentsPort, SearchServiceAppointmentsPort, SearchStatusAppointmentsPort, SearchNotesAppointmentsPort, SearchPriceAppointmentsPort, SearchDateAppointmentsPort, SearchTimeAppointmentsPort, SearchCreatedAppointmentsPort {
+public class AppointmentsAdapter implements CreateAppointmentsPort, DeleteAppointmentsPort,SearchCreatedAppointmentsPort, SearchCancelledAppointmentsPort, SearchCancelledByAppointmentsPort, SearchIdClientAppointmentsPort, SearchUpdatedAppointmentsPort, UpdateAppointmentsPort {
 
     private final AppointmentsRepository appointmentsRepository;
 
@@ -22,63 +23,57 @@ public class AppointmentsAdapter implements CreateAppointmentsPort, UpdateAppoin
     }
 
     @Override
-    public Optional<Appointments> update(Appointments appointments) {
-        if (appointments.getId() == null || !appointmentsRepository.existsById(appointments.getId())) {
-            return Optional.empty();
-        }
-        return Optional.of(appointmentsRepository.saveAndFlush(appointments));
-    }
-
-    @Override
     public void delete(Integer id) {
         appointmentsRepository.deleteById(id);
-        // Envia o delete ao banco agora, para um erro (ex: pagamento ligado) aparecer aqui.
-        appointmentsRepository.flush();
     }
 
     @Override
-    public List<Appointments> searchClient(Integer idClient) {
-        return appointmentsRepository.findByClientIdOrderByIdAsc(idClient);
+    public List<Appointments> searchCancelled(OffsetDateTime cancelled) {
+        Appointments appointments = Appointments.builder().cancelled(cancelled).build();
+
+        Example<Appointments> example = Example.of(appointments);
+        return appointmentsRepository.findAll(example);
     }
 
     @Override
-    public List<Appointments> searchProfessional(Integer idProfessional) {
-        return appointmentsRepository.findByProfessional(idProfessional);
+    public List<Appointments> searchCancelledBy(String cancelledBy) {
+        Appointments appointments = Appointments.builder().cancelledBy(cancelledBy).build();
+        Example<Appointments> example = Example.of(appointments);
+        return appointmentsRepository.findAll(example);
     }
 
     @Override
-    public List<Appointments> searchService(Integer idService) {
-        return appointmentsRepository.findByService(idService);
+    public List<Appointments> searchCreatedAppointments(OffsetDateTime created) {
+        Appointments appointments = Appointments.builder().created(created).build();
+
+        Example<Appointments> example = Example.of(appointments);
+        return appointmentsRepository.findAll(example);
     }
 
     @Override
-    public List<Appointments> searchStatus(String status) {
-        return appointmentsRepository.findByStatusOrderByIdAsc(status);
-    }
-
-    // Busca por "pedaço" do texto, sem diferenciar maiúsculas de minúsculas.
-    @Override
-    public List<Appointments> searchNotes(String notes) {
-        return appointmentsRepository.findByNotesContainingIgnoreCaseOrderByIdAsc(notes);
+    public List<Appointments> searchIdClient(Clients idClient) {
+        Appointments appointments = Appointments.builder().idClient(idClient.getId()).build();
+        Example<Appointments> example = Example.of(appointments);
+        return appointmentsRepository.findAll(example);
     }
 
     @Override
-    public List<Appointments> searchPrice(BigDecimal price) {
-        return appointmentsRepository.findByItemPrice(price);
+    public List<Appointments> searchUpdated(OffsetDateTime updated) {
+        Appointments appointments = Appointments.builder().updated(updated).build();
+
+        Example<Appointments> example = Example.of(appointments);
+        return appointmentsRepository.findAll(example);
     }
 
     @Override
-    public List<Appointments> searchDate(OffsetDateTime start, OffsetDateTime end) {
-        return appointmentsRepository.findByItemStartBetween(start, end);
-    }
+    public Optional<Appointments> update(Appointments appointments) {
+        Optional<Appointments> appointmentsOptional = appointmentsRepository.findById(appointments.getId());
+        if (appointmentsOptional.isPresent()){
+            return Optional.of(appointmentsRepository.saveAndFlush(appointments));
+        }
+        else {
+            return Optional.empty();
+        }
 
-    @Override
-    public List<Appointments> searchTime(OffsetDateTime startAt) {
-        return appointmentsRepository.findByItemStart(startAt);
-    }
-
-    @Override
-    public List<Appointments> searchCreated(OffsetDateTime created) {
-        return appointmentsRepository.findByCreatedOrderByIdAsc(created);
     }
 }
