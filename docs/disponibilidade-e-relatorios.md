@@ -112,10 +112,11 @@ Os agendamentos do período são buscados pelo `SearchDateAppointmentsPort`, que
 
 ## 4. Testes unitários
 
-31 testes (JUnit 5 + Mockito, no mesmo padrão dos outros módulos):
+34 testes (JUnit 5 + Mockito, no mesmo padrão dos outros módulos):
 
 - `ProfessionalAvailabilityServiceTest`: cadastro, validações, sobreposição, intervalo de almoço, edição, exclusão e horários livres.
 - `ProfessionalAvailabilityAdapterTest`: exclusão, edição e busca.
+- `ManagementReportsAdapterTest`: busca de serviços e profissionais para os nomes do relatório.
 - `ManagementReportsServiceTest`: contagens, taxas, faturamento, ticket médio, rankings, dia da semana e horário, filtro por profissional, ocupação e período inválido.
 
 Para rodar só esses testes:
