@@ -4,6 +4,8 @@ import com.belezaearte.salaobeleza.application.domain.dto.AppointmentsDto;
 
 import java.util.List;
 
-public interface SearchClientAppointmentsUseCase {
-    List<AppointmentsDto> searchClient (Integer idClient);
+public interface SearchCancelledByAppointmentsUseCase {
+    List<AppointmentsDto> searchCancelledBy (String cancelledBy);
+
 }
+

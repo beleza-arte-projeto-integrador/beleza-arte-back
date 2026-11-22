@@ -4,6 +4,7 @@ import com.belezaearte.salaobeleza.adapter.out.persistence.Appointments;
 
 import java.util.List;
 
-public interface SearchNotesAppointmentsPort {
-    List<Appointments> searchNotes (String notes);
+public interface SearchCancelledByAppointmentsPort {
+    List<Appointments> searchCancelledBy (String cancelledBy);
+
 }

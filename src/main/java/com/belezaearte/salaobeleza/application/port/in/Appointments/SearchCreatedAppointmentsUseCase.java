@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SearchCreatedAppointmentsUseCase {
     List<AppointmentsDto> searchCreated (OffsetDateTime created);
+
 }

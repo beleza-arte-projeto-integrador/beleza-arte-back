@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SearchCreatedAppointmentsPort {
     List<Appointments> searchCreated (OffsetDateTime created);
+
 }

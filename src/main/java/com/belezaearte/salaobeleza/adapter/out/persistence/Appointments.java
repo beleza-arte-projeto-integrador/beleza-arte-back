@@ -6,15 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.List;
 
-// O agendamento é a VISITA do cliente ao salão (tabela appointments).
-// Os serviços da visita, com profissional, horário e preço, ficam em appointment_items.
 @Data
 @Entity
 @Builder
@@ -28,43 +23,23 @@ public class Appointments {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    // Quem agendou (FK -> clients.id).
-    @Column(name = "client_id", nullable = false)
-    private Integer clientId;
+    @ManyToOne
+    @JoinColumn(name = "client_id", nullable = false)
+    private Clients idClients;
 
-    // AGENDADO, CONFIRMADO, CONCLUIDO, CANCELADO ou NAO_COMPARECEU.
-    @Column(name = "status", nullable = false)
-    private String status;
-
-    @Column(name = "notes")
-    private String notes;
-
-    // Preenchidos só quando o agendamento é cancelado.
     @Column(name = "cancelled_by")
     private String cancelledBy;
 
-    @Column(name = "cancel_reason")
-    private String cancelReason;
-
+    @CreationTimestamp
     @Column(name = "cancelled_at")
-    private OffsetDateTime cancelledAt;
+    private OffsetDateTime cancelled;
 
-    // Preenchido automaticamente com a data/hora em que o agendamento foi feito.
-    // updatable = false: um update nunca muda essa data.
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime created;
 
-    // Preenchido automaticamente sempre que o agendamento é alterado.
-    @UpdateTimestamp
+    @CreationTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updated;
 
-    // Serviços da visita, em ordem de horário. Só leitura: os itens são criados e
-    // alterados pelo módulo AppointmentsItems (insertable/updatable = false).
-    @OneToMany(fetch = FetchType.EAGER)
-    @Fetch(FetchMode.SUBSELECT)
-    @JoinColumn(name = "appointment_id", insertable = false, updatable = false)
-    @OrderBy("start_at")
-    private List<AppointmentsItems> items;
 }

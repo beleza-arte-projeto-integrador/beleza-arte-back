@@ -9,7 +9,6 @@ import com.belezaearte.salaobeleza.application.domain.dto.ManagementReportDto;
 import com.belezaearte.salaobeleza.application.domain.dto.ReportProfessionalDto;
 import com.belezaearte.salaobeleza.application.domain.dto.ReportServiceDto;
 import com.belezaearte.salaobeleza.application.port.in.ManagementReports.SearchManagementReportUseCase;
-import com.belezaearte.salaobeleza.application.port.out.appointmentsPort.SearchDateAppointmentsPort;
 import com.belezaearte.salaobeleza.application.port.out.managementReportsPort.SearchReportProfessionalsPort;
 import com.belezaearte.salaobeleza.application.port.out.managementReportsPort.SearchReportServicesPort;
 import com.belezaearte.salaobeleza.application.port.out.professionalAvailabilityPort.SearchAllProfessionalAvailabilityPort;
@@ -116,8 +115,8 @@ public class ManagementReportsService implements SearchManagementReportUseCase {
                 noShowAppointments++;
             } else {
                 validAppointments++;
-                if (appointment.getClientId() != null) {
-                    clients.add(appointment.getClientId());
+                if (appointment.getIdClients() != null) {
+                    clients.add(appointment.getIdClients());
                 }
             }
 
