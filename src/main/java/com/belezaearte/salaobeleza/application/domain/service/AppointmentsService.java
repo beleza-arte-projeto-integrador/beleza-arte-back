@@ -71,6 +71,7 @@ public class AppointmentsService implements SearchUpdatedAppointmentsUseCase,Sea
     public List<AppointmentsDto> searchCancelledBy (String cancelledBy){
         List<Appointments> appointmentsList = searchCancelledByAppointmentsPort.searchCancelledBy(cancelledBy);
 
+
         return appointmentsList.stream()
                 .map(appointments -> AppointmentsDto.builder()
                         .id(appointments.getId())
@@ -142,7 +143,7 @@ public class AppointmentsService implements SearchUpdatedAppointmentsUseCase,Sea
     @Override
     public AppointmentsDto create (AppointmentsDto appointmentsDto, Integer idClient){
 
-        if(appointmentsDto.getCancelledBy() == null || appointmentsDto.getIdClients() == null || appointmentsDto.getUpdated() == null || appointmentsDto.getCancelled() == null || appointmentsDto.getCreated() ==null ){
+        if( appointmentsDto.getIdClients() == null || appointmentsDto.getCreated() ==null ){
             throw new BusinessOutboundException("Erro: Campo não preenchido, por favor verifique se preencheu os dados corretamente");
         }
         Clients clients = clientsRepository.findById(idClient)

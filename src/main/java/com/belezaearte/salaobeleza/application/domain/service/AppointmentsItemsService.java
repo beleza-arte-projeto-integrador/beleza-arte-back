@@ -73,8 +73,9 @@ public class AppointmentsItemsService implements SearchEndDateUseCase, SearchSta
                         .price(appointmentsItems.getPrice())
                         .build()).toList();
     }
-    @Autowired
-    private GeneratePaymentsUseCase generatePaymentsUseCase;
+//    @Autowired
+//    private GeneratePaymentsUseCase generatePaymentsUseCase;
+//    private GeneratePaymentsUseCase generatePaymentsUseCase;
     @Autowired
     private SearchIdAppointmentsItemsPort searchIdAppointmentsItemsPort;
 
@@ -97,7 +98,7 @@ public class AppointmentsItemsService implements SearchEndDateUseCase, SearchSta
                 .price(appointmentsItemsDto.getPrice())
                 .build();
         AppointmentsItems appointmentsItems1 = createAppointmentsItemsPort.create(appointmentsItemsEntity);
-        generatePaymentsUseCase.generatePayments(appointmentsItems1.getAppointment_id());
+      //  generatePaymentsUseCase.generatePayments(appointmentsItems1.getAppointment_id());
 
         return AppointmentsItemsDto.builder()
                 .id(appointmentsItems1.getId())
@@ -115,7 +116,7 @@ public class AppointmentsItemsService implements SearchEndDateUseCase, SearchSta
     public void delete (Integer id){
         Optional<Integer> appointmentId = searchIdAppointmentsItemsPort.searchId(id).map(AppointmentsItems::getAppointment_id);
         deleteAppointmentsItemsPort.delete(id);
-        appointmentId.ifPresent(generatePaymentsUseCase::generatePayments);
+      //  appointmentId.ifPresent(generatePaymentsUseCase::generatePayments);
     }
 
     @Autowired
@@ -140,10 +141,10 @@ public class AppointmentsItemsService implements SearchEndDateUseCase, SearchSta
         if(appointmentsItems1 == null){
             throw new BusinessOutboundException("Erro: Verifique se todos os itens foram preenchidos corretamente");
         }
-        generatePaymentsUseCase.generatePayments(appointmentsItems1.getAppointment_id());
+        //generatePaymentsUseCase.generatePayments(appointmentsItems1.getAppointment_id());
         previousAppointmentId
-                .filter(previous -> !previous.equals(appointmentsItems1.getAppointment_id()))
-                .ifPresent(generatePaymentsUseCase::generatePayments);
+                .filter(previous -> !previous.equals(appointmentsItems1.getAppointment_id()));
+              //  .ifPresent(generatePaymentsUseCase::generatePayments);
 
         return AppointmentsItemsDto.builder()
                 .id(appointmentsItemsDto.getId())

@@ -71,21 +71,20 @@ public class AppointmentsAdapter implements SearchUpdatedAppointmentsPort,Search
         if(appointmentsOptional.isPresent()){
             Appointments appointments1 = appointmentsOptional.get();
 
-            appointments.setUpdated(appointments.getUpdated());
-            appointments.setCancelled(appointments.getCancelled());
-            appointments.setCancelledBy(appointments.getCancelledBy());
-            //   appointments.setId(appointments.getId());
-            appointments.setCreated(appointments.getCreated());
-            appointments.setIdClients(appointments.getIdClients());
+            appointments1.setIdClients(appointments.getIdClients());
+            appointments1.setCancelledBy(appointments.getCancelledBy());
+            appointments1.setCancelled(appointments.getCancelled());
+            appointments1.setUpdated(OffsetDateTime.now());
 
             return appointmentsRepository.saveAndFlush(appointments1);
         }
         return null;
     }
     @Override
+    @Transactional
     public void deleteAppointments (Integer id){
         if(appointmentsRepository.existsById(id)){
-            appointmentsRepository.existsById(id);
+            appointmentsRepository.deleteById(id);
         } else{
             throw new BusinessOutboundException("Erro: Verifique se existe o"+ id);
         }

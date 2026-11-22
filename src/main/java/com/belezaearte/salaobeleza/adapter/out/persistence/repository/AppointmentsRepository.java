@@ -7,5 +7,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AppointmentsRepository extends JpaRepository<Appointments, Integer> {
-
+    List<Appointments> findByCancelledByIsNotNull();
 }

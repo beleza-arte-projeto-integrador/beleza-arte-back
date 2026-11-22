@@ -30,16 +30,15 @@ public class Appointments {
     @Column(name = "cancelled_by")
     private String cancelledBy;
 
-    @CreationTimestamp
     @Column(name = "cancelled_at")
     private OffsetDateTime cancelled;
 
-    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime created;
 
-    @CreationTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updated;
 
 }
+
+
